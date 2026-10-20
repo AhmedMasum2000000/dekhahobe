@@ -61,7 +61,9 @@ export function TopNav() {
   const user = useSession((s) => s.user);
   const [open, setOpen] = useState(false);
   const loc = useLocation();
-  useEffect(() => setOpen(false), [loc.pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [loc.pathname]);
   const link = ({ isActive }: { isActive: boolean }) => `rounded-full px-3.5 py-2 text-sm font-semibold transition ${isActive ? 'text-ink' : 'text-ink-3 hover:text-ink'}`;
   return (
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-white">
@@ -174,7 +176,9 @@ export function Footer() {
 
 export function AppLayout() {
   const loc = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [loc.pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [loc.pathname]);
   return (
     <div className="min-h-screen bg-white">
       <TopNav />

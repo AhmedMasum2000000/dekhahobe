@@ -349,6 +349,43 @@ try {
   const healed = await p3.getByTestId('hero-title').waitFor({ timeout: 15000 }).then(() => true, () => false);
   ok(healed && !missMain, 'missing main code file → page fetches a fresh copy and renders');
   await p3.close();
+
+  // ---- K. Hosts that wrap scrollTo/focus/scrollIntoView and return a value (the claude.ai viewer
+  // does) must not crash page changes: effects never return what those calls return
+  const p4 = await ctx.newPage();
+  await p4.setViewportSize({ width: 390, height: 844 });
+  await p4.addInitScript(() => {
+    const wrap = (obj, name) => {
+      const orig = obj[name];
+      obj[name] = function (...a) {
+        orig.apply(this, a);
+        return Promise.resolve();
+      };
+    };
+    wrap(window, 'scrollTo');
+    wrap(HTMLElement.prototype, 'focus');
+    wrap(Element.prototype, 'scrollIntoView');
+  });
+  const p4Errors = [];
+  p4.on('pageerror', (e) => p4Errors.push(e.message));
+  await p4.goto(BASE + '/');
+  await p4.waitForLoadState('networkidle');
+  const tabs4 = p4.locator('nav[aria-label="App tabs"]');
+  const snags = [];
+  for (const [label, act] of [
+    ['Explore', () => tabs4.getByText('Explore', { exact: true }).click()],
+    ['event', () => p4.getByTestId('event-card').first().click()],
+    ['organizer', () => p4.locator('main a[href*="#/g/"]').first().click()],
+    ['Tickets', () => tabs4.getByText('Tickets', { exact: true }).click()],
+    ['Activity', () => tabs4.getByText('Activity', { exact: true }).click()],
+    ['home', () => p4.locator('header a[aria-label="B-POP TAGS home"]').click()],
+  ]) {
+    await act();
+    await p4.waitForTimeout(600);
+    if (await p4.getByTestId('page-error').count()) snags.push(label);
+  }
+  ok(snags.length === 0 && p4Errors.length === 0, `wrapped scrollTo/focus host: every page change works${snags.length ? ` (error page after: ${snags.join(', ')})` : ''}${p4Errors.length ? ` errors: ${p4Errors.join(' | ')}` : ''}`);
+  await p4.close();
   console.log(`\n${passed} checks passed`);
 } catch (e) {
   console.error(e.message);

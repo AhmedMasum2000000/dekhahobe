@@ -18,7 +18,9 @@ export function RequireLogin({ children }: { children: ReactNode }) {
 
 function OtpBoxes({ value, onChange, onComplete }: { value: string; onChange: (v: string) => void; onComplete: (v: string) => void }) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
-  useEffect(() => refs.current[0]?.focus(), []);
+  useEffect(() => {
+    refs.current[0]?.focus();
+  }, []);
   return (
     <div className="flex justify-between gap-2" onPaste={(e) => { const d = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6); if (d) { e.preventDefault(); onChange(d); if (d.length === 6) onComplete(d); } }}>
       {Array.from({ length: 6 }, (_, i) => (

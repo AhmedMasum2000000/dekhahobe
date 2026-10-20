@@ -250,7 +250,9 @@ function Chat({ ev }: { ev: BpopEvent }) {
   const { data: msgs } = useApi(() => (can ? api.listMessages(ev.id) : Promise.resolve([])), [ev.id, can]);
   const [text, setText] = useState('');
   const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [msgs?.length]);
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'nearest' });
+  }, [msgs?.length]);
   if (!ev.chatEnabled) return null;
   return (
     <section>

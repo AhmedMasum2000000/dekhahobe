@@ -13,6 +13,15 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
+      // `useEffect(() => fn())` returns fn's result, and React calls a returned value as the
+      // cleanup. Hosts that wrap scrollTo/focus to return a value crashed every page change.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CallExpression[callee.name=/^use(Layout|Insertion)?Effect$/] > ArrowFunctionExpression[expression=true]',
+          message: 'Effect callbacks must use a block body so they never return a value.',
+        },
+      ],
     },
   },
 );
