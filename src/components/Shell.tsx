@@ -63,7 +63,7 @@ export function TopNav() {
   useEffect(() => setOpen(false), [loc.pathname]);
   const link = ({ isActive }: { isActive: boolean }) => `rounded-full px-3.5 py-2 text-sm font-semibold transition ${isActive ? 'text-ink' : 'text-ink-3 hover:text-ink'}`;
   return (
-    <header className="sticky top-0 z-40 border-b border-line/70 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-white/90 backdrop-blur-md">
       <div className="h-1 bg-[linear-gradient(90deg,#FA02A3,#FED7EF_45%,#FA02A3_70%,#E3001B)]" aria-hidden />
       <div className="container-x flex h-16 items-center justify-between gap-3">
         <Link to="/" aria-label="B-POP TAGS home">

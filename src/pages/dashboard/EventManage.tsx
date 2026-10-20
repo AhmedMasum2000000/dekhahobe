@@ -383,6 +383,7 @@ function OrdersTab({ ev, manager }: { ev: BpopEvent; manager: boolean }) {
   const { data } = useApi(() => api.eventOrders(ev.id), [ev.id]);
   const [f, setF] = useState<(typeof ORDER_FILTERS)[number][0]>('all');
   const [q, setQ] = useState('');
+  const [refunding, setRefunding] = useState<Order | null>(null);
   if (!data) return <PageSpinner />;
   const list = data.filter((o) => (f === 'all' ? true : f === 'refund' ? o.refundRequested && o.status === 'paid' : o.status === f)).filter((o) => !q || `${o.buyer.name} ${o.number} ${o.buyer.phone}`.toLowerCase().includes(q.toLowerCase()));
   const pending = data.filter((o) => o.status === 'pending_approval').length;
@@ -407,7 +408,7 @@ function OrdersTab({ ev, manager }: { ev: BpopEvent; manager: boolean }) {
                 <td className="p-3"><Badge tone={o.status === 'paid' ? 'ok' : o.status === 'pending_approval' ? 'warn' : 'neutral'}>{o.status.replace('_', ' ')}</Badge>{o.refundRequested && o.status === 'paid' && <Badge tone="bad" className="ml-1">refund requested</Badge>}{o.status === 'paid' && (o.refundedAmount ?? 0) > 0 && <Badge className="ml-1">{tk(o.refundedAmount!)} refunded</Badge>}</td>
                 <td className="p-3 text-right">
                   {manager && o.status === 'pending_approval' && <span className="flex justify-end gap-1"><button className="btn btn-primary btn-sm" data-testid="approve" onClick={() => api.approveOrder(o.id, true).then(() => toast.success('Approved — tickets issued'), toast.error)}><Check className="h-4 w-4" /></button><button className="btn btn-outline btn-sm" onClick={() => api.approveOrder(o.id, false).then(() => toast.info('Declined'), toast.error)}><X className="h-4 w-4" /></button></span>}
-                  {manager && o.status === 'paid' && o.total - (o.refundedAmount ?? 0) > 0 && <button className="btn btn-outline btn-sm" onClick={() => { if (confirm(`Refund up to ${tk(o.total - (o.refundedAmount ?? 0))} to ${o.buyer.name}? Only tickets they still hold are refunded — transferred tickets stay valid.`)) api.refundOrder(o.id).then(() => toast.success('Refunded'), toast.error); }}>Refund</button>}
+                  {manager && o.status === 'paid' && o.total - (o.refundedAmount ?? 0) > 0 && <button className="btn btn-outline btn-sm" data-testid="refund" onClick={() => setRefunding(o)}>Refund</button>}
                 </td>
               </tr>
             ))}
@@ -415,6 +416,26 @@ function OrdersTab({ ev, manager }: { ev: BpopEvent; manager: boolean }) {
         </table>
         {list.length === 0 && <p className="p-6 text-center text-sm text-ink-3">No orders here.</p>}
       </div>
+      <Modal
+        open={!!refunding}
+        onClose={() => setRefunding(null)}
+        title={refunding ? `Refund ${refunding.buyer.name}?` : ''}
+        footer={
+          <button
+            className="btn btn-danger btn-lg w-full"
+            data-testid="confirm-refund"
+            onClick={() => {
+              const o = refunding!;
+              setRefunding(null);
+              api.refundOrder(o.id).then(() => toast.success(`Order ${o.number} refunded`), toast.error);
+            }}
+          >
+            Refund up to {refunding ? tk(refunding.total - (refunding.refundedAmount ?? 0)) : ''}
+          </button>
+        }
+      >
+        <p className="text-sm text-ink-2">Order {refunding?.number}. Only tickets the buyer still holds are refunded and cancelled. Tickets they transferred to someone else stay valid.</p>
+      </Modal>
     </div>
   );
 }
