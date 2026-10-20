@@ -28,6 +28,24 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       - run: npm run lint
       - run: npm run build
+      # Keep the code files of earlier deploys online. Browsers may reuse a cached page for
+      # 10 minutes, and that page still asks for the previous version's files.
+      - uses: actions/cache/restore@v4
+        with:
+          path: asset-history
+          key: pages-assets-${{ github.run_id }}
+          restore-keys: pages-assets-
+      - name: Merge assets from earlier deploys
+        run: |
+          mkdir -p asset-history
+          find asset-history -type f -mtime +14 -delete
+          cp -np asset-history/* dist/assets/ 2>/dev/null || true
+          cp -p dist/assets/* asset-history/
+          echo "serving $(ls dist/assets | wc -l) asset files"
+      - uses: actions/cache/save@v4
+        with:
+          path: asset-history
+          key: pages-assets-${{ github.run_id }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

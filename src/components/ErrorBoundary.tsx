@@ -9,11 +9,19 @@ import { PopStar } from './ui';
 const CHUNK_ERROR = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|ChunkLoadError|Loading chunk/i;
 const RELOAD_KEY = 'bpop:reloaded-at';
 
-/** Reload the page at most once a minute, so a broken deploy can't loop. */
+declare global {
+  interface Window {
+    /** Set by the boot guard in index.html: reloads a fresh copy, at most once every 30 s. */
+    __bpopFreshReload?: () => boolean;
+  }
+}
+
+/** Load the current version once; returns false if we just did and it didn't help. */
 export function reloadOnce(): boolean {
+  if (window.__bpopFreshReload) return window.__bpopFreshReload();
   try {
     const last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
-    if (Date.now() - last < 60_000) return false;
+    if (Date.now() - last < 30_000) return false;
     sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
   } catch {
     /* storage blocked: still try a single reload */
@@ -57,7 +65,7 @@ class Boundary extends Component<{ children: ReactNode; resetKey: string }, Stat
         {!reloading && (
           <>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
-              <button className="btn btn-brand btn-lg" onClick={() => window.location.reload()}>Reload</button>
+              <button className="btn btn-brand btn-lg" onClick={() => reloadOnce() || window.location.reload()}>Reload</button>
               <a href="#/" className="btn btn-outline btn-lg">Go home</a>
             </div>
             <p className="mt-6 max-w-md break-words font-mono text-xs text-ink-4">{error.message}</p>

@@ -9,6 +9,9 @@ window.addEventListener('vite:preloadError', (e) => {
   if (reloadOnce()) e.preventDefault();
 });
 
+// drop the cache-busting ?v= the boot guard may have added
+if (/[?&]v=/.test(window.location.search)) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

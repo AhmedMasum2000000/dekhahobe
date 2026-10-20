@@ -331,6 +331,24 @@ try {
   const recovered = await p2.getByTestId('ev-title').waitFor({ timeout: 15000 }).then(() => true, () => false);
   ok(recovered && !failFirst, 'missing code file after a deploy → app reloads itself and the page renders');
   await p2.close();
+
+  // ---- J. A cached page asks for a main code file that's gone: loading screen, then self-recovery
+  const p3 = await ctx.newPage();
+  let missMain = true;
+  await p3.route(/assets\/index-[^/]*\.js$/, async (r) => {
+    if (missMain) {
+      missMain = false;
+      await new Promise((res) => setTimeout(res, 600));
+      return r.fulfill({ status: 404, body: 'Not Found' });
+    }
+    return r.continue();
+  });
+  await p3.goto(BASE + '/', { waitUntil: 'commit' });
+  const bootShown = await p3.locator('#boot').getByText('Loading B-POP TAGS').waitFor({ timeout: 5000 }).then(() => true, () => false);
+  ok(bootShown, 'while code loads the page shows a loading screen, not solid white');
+  const healed = await p3.getByTestId('hero-title').waitFor({ timeout: 15000 }).then(() => true, () => false);
+  ok(healed && !missMain, 'missing main code file → page fetches a fresh copy and renders');
+  await p3.close();
   console.log(`\n${passed} checks passed`);
 } catch (e) {
   console.error(e.message);
