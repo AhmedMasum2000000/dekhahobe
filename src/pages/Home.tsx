@@ -6,6 +6,7 @@ import { PosterArt } from '@/components/PosterArt';
 import { EventCard } from '@/components/EventCard';
 import { Avatar, AvatarStack, PopStar, Sparkle, Verified } from '@/components/ui';
 import { cardRange, dayLabel, tk } from '@/lib/util';
+import heroArt from '@/assets/bpop-hero-art.webp';
 
 export const INSTAGRAM_URL = 'https://www.instagram.com/bpop.tags/';
 
@@ -79,21 +80,35 @@ export default function Home() {
   return (
     <div>
       {/* hero */}
-      <section className="relative overflow-hidden pb-10 pt-10 sm:pt-14">
+      <section className="relative overflow-hidden pb-10 pt-8 sm:pt-12">
         <div className="halftone halftone-fade pointer-events-none absolute -left-24 -top-24 h-80 w-80 text-brand/40" aria-hidden />
-        <div className="halftone halftone-fade pointer-events-none absolute -right-20 top-24 h-72 w-72 text-brand/30" aria-hidden />
-        <div className="container-x relative mb-10 text-center">
-          <div className="flex justify-center"><RadarStamp className="text-brand-dark" /></div>
-          <h1 className="headline mx-auto mt-5 max-w-4xl text-[58px] sm:text-[112px]" data-testid="hero-title">
-            You are on <span className="relative inline-block text-brand">our radar<Sparkle className="absolute -right-6 -top-2 h-6 w-6 animate-twinkle text-brand sm:-right-9 sm:h-9 sm:w-9" /></span>
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-[17px] text-ink-2">
-            Bangla Pop Tags is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
-          </p>
-          <div className="mt-7 flex flex-wrap justify-center gap-2">
-            <Link to="/explore" className="btn btn-brand btn-lg">Explore events</Link>
-            <Link to="/create" className="btn btn-outline btn-lg">Host an event</Link>
+        <div className="container-x relative mb-10 grid items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-4">
+          <div className="min-w-0 text-center lg:text-left">
+            <div className="flex justify-center lg:justify-start"><RadarStamp className="text-brand-dark" /></div>
+            <h1 className="headline mx-auto mt-5 max-w-4xl text-[58px] sm:text-[104px] lg:mx-0 lg:text-[96px] xl:text-[112px]" data-testid="hero-title">
+              You are on <span className="relative inline-block text-brand">our radar<Sparkle className="absolute -right-6 -top-2 h-6 w-6 animate-twinkle text-brand sm:-right-9 sm:h-9 sm:w-9" /></span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-xl text-[17px] text-ink-2 lg:mx-0">
+              Bangla Pop Tags is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
+            </p>
+            <div className="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start">
+              <Link to="/explore" className="btn btn-brand btn-lg">Explore events</Link>
+              <Link to="/create" className="btn btn-outline btn-lg">Host an event</Link>
+            </div>
           </div>
+          <figure className="relative mx-auto w-full max-w-[300px] sm:max-w-[360px] lg:max-w-[440px]" data-testid="hero-art">
+            <div className="halftone halftone-fade pointer-events-none absolute -inset-8 text-brand/35" aria-hidden />
+            <img
+              src={heroArt}
+              width={960}
+              height={1091}
+              alt="B-POP TAGS artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
+              className="relative h-auto w-full select-none drop-shadow-[0_18px_40px_rgba(250,2,163,0.18)]"
+              draggable={false}
+              decoding="async"
+            />
+            <Sparkle className="absolute right-3 top-8 h-8 w-8 animate-twinkle text-brand" />
+          </figure>
         </div>
         {posters.length > 0 && (
           <div className="space-y-3 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
