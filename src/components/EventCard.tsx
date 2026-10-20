@@ -22,7 +22,7 @@ export function SaveButton({ eventId, className = '' }: { eventId: string; class
   return (
     <button
       aria-label={saved ? 'Unsave event' : 'Save event'}
-      className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-105 ${className}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:scale-105 ${className}`}
       onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();

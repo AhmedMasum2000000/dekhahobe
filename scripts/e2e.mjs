@@ -1,4 +1,4 @@
-// End-to-end flows for Bpop Tags, run against a live build:
+// End-to-end flows for B-POP TAGS, run against a live build:
 //   npm run build && npm run preview   (in one terminal)
 //   npm run e2e                         (in another)
 // Env: BASE (default http://localhost:4173), SHOTS (screenshot folder, optional)
@@ -287,7 +287,50 @@ try {
     await shot(n);
   }
 
+  // ---- H. Phone tap-through: every page renders without a refresh, with no SVG filters
+  await go('/');
+  const filters = () => page.evaluate(() => document.querySelectorAll('[filter]').length);
+  const homeFilters = await filters();
+  const filled = () => page.evaluate(() => (document.getElementById('root')?.children.length ?? 0) > 0 && (document.querySelector('main')?.innerText.trim().length ?? 0) > 0);
+  const tabs = page.locator('nav[aria-label="App tabs"]');
+  let exploreFilters = -1;
+  const blank = [];
+  for (const [label, act] of [
+    ['Explore tab', () => tabs.getByText('Explore', { exact: true }).click()],
+    ['event card', () => tid('event-card').first().click()],
+    ['organizer', () => page.locator('main a[href*="#/g/"]').first().click()],
+    ['back', () => page.goBack()],
+    ['Tickets tab', () => tabs.getByText('Tickets', { exact: true }).click()],
+    ['Activity tab', () => tabs.getByText('Activity', { exact: true }).click()],
+    ['logo', () => page.locator('header a[aria-label="B-POP TAGS home"]').click()],
+  ]) {
+    await act();
+    await page.waitForTimeout(700);
+    if (label === 'Explore tab') exploreFilters = await filters();
+    if (!(await filled())) blank.push(label);
+  }
+  ok(blank.length === 0, `tap-through: every page renders without a refresh${blank.length ? ` (blank after: ${blank.join(', ')})` : ''}`);
+  ok(homeFilters === 0 && exploreFilters === 0, `posters render without SVG filters (home ${homeFilters}, explore ${exploreFilters})`);
+
   ok(errors.length === 0, `no page errors${errors.length ? `: ${errors.join(' | ')}` : ''}`);
+
+  // ---- I. A code file from an older deploy is gone: the app reloads itself instead of going white
+  const p2 = await ctx.newPage();
+  await p2.setViewportSize({ width: 390, height: 844 });
+  let failFirst = true;
+  await p2.route(/assets\/EventEditor-[^/]*\.js$/, (r) => {
+    if (failFirst) {
+      failFirst = false;
+      return r.fulfill({ status: 404, body: 'Not Found' });
+    }
+    return r.continue();
+  });
+  await p2.goto(BASE + '/');
+  await p2.waitForLoadState('networkidle');
+  await p2.locator('nav[aria-label="App tabs"]').getByText('Create', { exact: true }).click();
+  const recovered = await p2.getByTestId('ev-title').waitFor({ timeout: 15000 }).then(() => true, () => false);
+  ok(recovered && !failFirst, 'missing code file after a deploy → app reloads itself and the page renders');
+  await p2.close();
   console.log(`\n${passed} checks passed`);
 } catch (e) {
   console.error(e.message);

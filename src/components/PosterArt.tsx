@@ -3,6 +3,8 @@ import type { Poster } from '@/api';
 
 // Original generative flyer art — six styles, deterministic from a seed.
 // 'zine' is the B-POP TAGS collage look: black, hot pink halftone, red tape, Y2K star.
+// No SVG filters or masks: phones (WebKit) render those into large offscreen buffers, and
+// a page full of posters can exhaust memory and blank the view. Grain is a shared CSS tile.
 function rng(seed: number) {
   let a = seed >>> 0;
   return () => {
@@ -54,7 +56,6 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
   const lines = wrap(title, poster.style === 'type' ? 10 : 13, poster.style === 'type' ? 5 : 4);
   const fs = lines.length > 3 ? 40 : lines.length > 2 ? 46 : 54;
   const g = `g${uidRaw}`;
-  const n = `n${uidRaw}`;
 
   const art = (() => {
     switch (poster.style) {
@@ -98,7 +99,16 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
         return (
           <>
             <rect width="400" height="500" fill="#0A0A0A" />
-            <circle cx={250 + r() * 90} cy={150 + r() * 60} r="190" fill={`url(#d${uidRaw})`} mask={`url(#m${uidRaw})`} />
+            {(() => {
+              const cx = 250 + r() * 90;
+              const cy = 150 + r() * 60;
+              return (
+                <>
+                  <circle cx={cx} cy={cy} r="190" fill={`url(#d${uidRaw})`} />
+                  <circle cx={cx} cy={cy} r="192" fill={`url(#f${uidRaw})`} />
+                </>
+              );
+            })()}
             <rect x="-40" y={250 + r() * 50} width="520" height="46" fill="#E3001B" transform={`rotate(${-8 + r() * 5} 200 280)`} opacity=".92" />
             <rect x="-40" y={120 + r() * 40} width="300" height="18" fill={c1} transform={`rotate(${6 + r() * 4} 120 130)`} opacity=".85" />
             <g transform="translate(22 18) scale(1.05)">
@@ -125,7 +135,7 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
           <>
             <rect width="400" height="500" fill={`url(#${g})`} />
             {Array.from({ length: 4 }, (_, i) => (
-              <circle key={i} cx={r() * 400} cy={r() * 380} r={60 + r() * 120} fill={i % 2 ? light : c2} opacity={0.25 + r() * 0.3} filter={`url(#b${uidRaw})`} />
+              <circle key={i} cx={r() * 400} cy={r() * 380} r={90 + r() * 150} fill={`url(#${i % 2 ? 'bl' : 'bc'}${uidRaw})`} opacity={0.35 + r() * 0.4} />
             ))}
           </>
         );
@@ -134,48 +144,49 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
 
   const textColor = poster.style === 'wave' ? dark : '#fff';
   return (
-    <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className={`h-full w-full ${className}`} role="img" aria-label={`${title} flyer`}>
-      <defs>
-        <linearGradient id={g} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor={c1} />
-          <stop offset="1" stopColor={c2} />
-        </linearGradient>
-        <filter id={`b${uidRaw}`}>
-          <feGaussianBlur stdDeviation="30" />
-        </filter>
-        <pattern id={`d${uidRaw}`} width="11" height="11" patternUnits="userSpaceOnUse">
-          <circle cx="5.5" cy="5.5" r="3.4" fill="#FA02A3" />
-        </pattern>
-        <radialGradient id={`r${uidRaw}`}>
-          <stop offset="0" stopColor="#fff" />
-          <stop offset=".75" stopColor="#fff" stopOpacity=".35" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </radialGradient>
-        <mask id={`m${uidRaw}`}>
-          <rect width="400" height="500" fill={`url(#r${uidRaw})`} />
-        </mask>
-        <filter id={n}>
-          <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch" />
-          <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .18 0" />
-          <feComposite operator="in" in2="SourceGraphic" />
-        </filter>
-      </defs>
-      {art}
-      <rect width="400" height="500" filter={`url(#${n})`} />
-      {showText && (
-        <g fontFamily="Anton, 'Inter Tight', Impact, sans-serif" fill={textColor}>
-          {kicker && (
-            <text x="28" y="44" fontSize="15" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="3" opacity=".9">
-              {kicker.toUpperCase()}
-            </text>
-          )}
-          {lines.map((l, i) => (
-            <text key={i} x="26" y={472 - (lines.length - 1 - i) * (fs * 1.02)} fontSize={fs} letterSpacing=".5" fill={poster.style === 'zine' && i === lines.length - 1 ? '#FA02A3' : undefined}>
-              {l}
-            </text>
-          ))}
-        </g>
-      )}
-    </svg>
+    <span className={`relative block h-full w-full ${className}`}>
+      <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className="block h-full w-full" role="img" aria-label={`${title} flyer`}>
+        <defs>
+          <linearGradient id={g} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor={c1} />
+            <stop offset="1" stopColor={c2} />
+          </linearGradient>
+          <radialGradient id={`bl${uidRaw}`}>
+            <stop offset="0" stopColor={light} />
+            <stop offset=".5" stopColor={light} stopOpacity=".7" />
+            <stop offset="1" stopColor={light} stopOpacity="0" />
+          </radialGradient>
+          <radialGradient id={`bc${uidRaw}`}>
+            <stop offset="0" stopColor={c2} />
+            <stop offset=".5" stopColor={c2} stopOpacity=".7" />
+            <stop offset="1" stopColor={c2} stopOpacity="0" />
+          </radialGradient>
+          <pattern id={`d${uidRaw}`} width="11" height="11" patternUnits="userSpaceOnUse">
+            <circle cx="5.5" cy="5.5" r="3.4" fill="#FA02A3" />
+          </pattern>
+          <radialGradient id={`f${uidRaw}`}>
+            <stop offset=".35" stopColor="#0A0A0A" stopOpacity="0" />
+            <stop offset=".8" stopColor="#0A0A0A" stopOpacity=".65" />
+            <stop offset="1" stopColor="#0A0A0A" />
+          </radialGradient>
+        </defs>
+        {art}
+        {showText && (
+          <g fontFamily="Anton, 'Inter Tight', Impact, sans-serif" fill={textColor}>
+            {kicker && (
+              <text x="28" y="44" fontSize="15" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="3" opacity=".9">
+                {kicker.toUpperCase()}
+              </text>
+            )}
+            {lines.map((l, i) => (
+              <text key={i} x="26" y={472 - (lines.length - 1 - i) * (fs * 1.02)} fontSize={fs} letterSpacing=".5" fill={poster.style === 'zine' && i === lines.length - 1 ? '#FA02A3' : undefined}>
+                {l}
+              </text>
+            ))}
+          </g>
+        )}
+      </svg>
+      <span className="poster-grain" aria-hidden />
+    </span>
   );
 });

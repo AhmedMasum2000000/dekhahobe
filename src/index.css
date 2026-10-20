@@ -42,7 +42,13 @@
     background-size: 9px 9px;
   }
   .halftone-fade { mask-image: radial-gradient(closest-side, #000 20%, transparent); }
+  /* film grain over generated posters: one shared tile, no SVG filters */
+  .poster-grain { @apply pointer-events-none absolute inset-0; background-image: url('./assets/grain.png'); background-size: 128px 128px; }
   .stamp { @apply inline-flex items-center gap-1.5 rounded-sm border-[1.5px] border-current px-2 py-0.5 text-[10px] font-extrabold uppercase leading-none tracking-[0.18em]; }
   .tag-pop { @apply inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white; }
   .outline-pop { -webkit-text-stroke: 3px theme('colors.brand.DEFAULT'); color: theme('colors.brand.soft'); paint-order: stroke fill; text-shadow: 0.05em 0.05em 0 theme('colors.brand.DEFAULT'); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marqueeRev, .animate-twinkle, .animate-rise { animation: none !important; }
 }

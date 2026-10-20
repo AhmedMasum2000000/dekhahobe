@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Instagram, Megaphone, Rocket, Sparkles, Star, Users, Wallet } from 'lucide-react';
 import { api, type BpopEvent } from '@/api';
@@ -10,11 +11,11 @@ import heroArt from '@/assets/bpop-hero-art.webp';
 
 export const INSTAGRAM_URL = 'https://www.instagram.com/bpop.tags/';
 
-function PosterRow({ events, reverse }: { events: BpopEvent[]; reverse?: boolean }) {
+function PosterRow({ events, reverse, paused }: { events: BpopEvent[]; reverse?: boolean; paused: boolean }) {
   const list = [...events, ...events];
   return (
     <div className="overflow-hidden">
-      <div className={`flex w-max gap-3 ${reverse ? 'animate-marqueeRev' : 'animate-marquee'} hover:[animation-play-state:paused]`}>
+      <div className={`flex w-max gap-3 ${reverse ? 'animate-marqueeRev' : 'animate-marquee'} ${paused ? '[animation-play-state:paused]' : 'hover:[animation-play-state:paused]'}`}>
         {list.map((e, i) => (
           <Link key={`${e.id}-${i}`} to={`/e/${e.slug}`} className="block aspect-[4/5] w-32 shrink-0 overflow-hidden rounded-2xl sm:w-40" tabIndex={i >= events.length ? -1 : 0}>
             <PosterArt poster={e.poster} title={e.title} />
@@ -70,8 +71,23 @@ function SectionHead({ children, sub, action }: { children: React.ReactNode; sub
   );
 }
 
+/** True while the element is on screen, so off-screen animation can stop. */
+function useOnScreen<T extends Element>() {
+  const ref = useRef<T>(null);
+  const [on, setOn] = useState(true);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setOn(!!e?.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return [ref, on] as const;
+}
+
 export default function Home() {
   const { data } = useApi(() => api.homeFeed(), []);
+  const [marqueeRef, marqueeOn] = useOnScreen<HTMLDivElement>();
   const posters = data?.posters ?? [];
   const third = Math.ceil(posters.length / 3);
   const rows = [posters.slice(0, third), posters.slice(third, third * 2), posters.slice(third * 2)].map((r) => (r.length ? r : posters));
@@ -97,13 +113,14 @@ export default function Home() {
             </div>
           </div>
           <figure className="relative mx-auto w-full max-w-[300px] sm:max-w-[360px] lg:max-w-[440px]" data-testid="hero-art">
+            <div className="pointer-events-none absolute inset-x-[6%] bottom-[4%] top-[10%] bg-[radial-gradient(closest-side,rgba(250,2,163,0.18),transparent)]" aria-hidden />
             <div className="halftone halftone-fade pointer-events-none absolute -inset-8 text-brand/35" aria-hidden />
             <img
               src={heroArt}
               width={960}
               height={1091}
               alt="B-POP TAGS artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
-              className="relative h-auto w-full select-none drop-shadow-[0_18px_40px_rgba(250,2,163,0.18)]"
+              className="relative h-auto w-full select-none"
               draggable={false}
               decoding="async"
             />
@@ -111,10 +128,12 @@ export default function Home() {
           </figure>
         </div>
         {posters.length > 0 && (
-          <div className="space-y-3 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
-            <PosterRow events={rows[0]!} />
-            <PosterRow events={rows[1]!} reverse />
-            <PosterRow events={rows[2]!} />
+          <div ref={marqueeRef} className="relative space-y-3">
+            <PosterRow events={rows[0]!} paused={!marqueeOn} />
+            <PosterRow events={rows[1]!} reverse paused={!marqueeOn} />
+            <PosterRow events={rows[2]!} paused={!marqueeOn} />
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[10%] bg-gradient-to-r from-white to-transparent" aria-hidden />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[10%] bg-gradient-to-l from-white to-transparent" aria-hidden />
           </div>
         )}
       </section>
@@ -164,7 +183,7 @@ export default function Home() {
       {/* here's what you missed last week */}
       {data && data.recap.length > 0 && (
         <section className="relative mt-24 overflow-hidden border-y border-line bg-brand-light py-16" data-testid="recap">
-          <div className="halftone pointer-events-none absolute inset-y-0 right-0 w-1/2 text-brand/15 [mask-image:linear-gradient(90deg,transparent,#000)]" aria-hidden />
+          <div className="halftone halftone-fade pointer-events-none absolute -right-16 -top-10 h-72 w-72 text-brand/25" aria-hidden />
           <div className="container-x relative">
             <SectionHead sub={<span className="tag-pop">Recap</span>}>
               Here’s what you <span className="text-brand">missed</span> last week

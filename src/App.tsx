@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '@/components/Shell';
 import { Toaster } from '@/components/Toaster';
+import { RouteErrorBoundary } from '@/components/ErrorBoundary';
 import { PageSpinner } from '@/components/ui';
 import Home from '@/pages/Home';
 import Explore from '@/pages/Explore';
@@ -29,47 +30,49 @@ export default function App() {
   return (
     <HashRouter>
       <Toaster />
-      <Suspense fallback={<PageSpinner />}>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route index element={<Home />} />
-            <Route path="explore" element={<Explore />} />
-            <Route path="e/:slug" element={<EventPage />} />
-            <Route path="e/:slug/checkout" element={<Checkout />} />
-            <Route path="orders/:id" element={<OrderPage />} />
-            <Route path="tickets" element={<Tickets />} />
-            <Route path="tickets/:id" element={<TicketDetail />} />
-            <Route path="g/:slug" element={<OrgProfile />} />
-            <Route path="u/:username" element={<UserProfile />} />
-            <Route path="series/:id" element={<SeriesPage />} />
-            <Route path="saved" element={<Saved />} />
-            <Route path="notifications" element={<Notifications />} />
-            <Route path="kickbacks" element={<Kickbacks />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="platform" element={<Platform />} />
-            <Route path="help" element={<Help />} />
-            <Route path="terms/:doc" element={<Legal />} />
-            <Route path="app" element={<Simple kind="app" />} />
-            <Route path="vision" element={<Simple kind="vision" />} />
-            <Route path="careers" element={<Simple kind="careers" />} />
-            <Route path="login" element={<Login />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-          <Route path="create" element={<CreateEvent />} />
-          <Route path="scanner" element={<Scanner />} />
-          <Route path="dashboard" element={<DashboardLayout />}>
-            <Route index element={<Overview />} />
-            <Route path="events" element={<EventsList />} />
-            <Route path="events/:id" element={<EventManage />} />
-            <Route path="events/:id/:tab" element={<EventManage />} />
-            <Route path="insights" element={<Insights />} />
-            <Route path="sms" element={<Sms />} />
-            <Route path="finance" element={<Finance />} />
-            <Route path="settings" element={<OrgSettings />} />
-            <Route path="new-org" element={<NewOrg />} />
-          </Route>
-        </Routes>
-      </Suspense>
+      <RouteErrorBoundary>
+        <Suspense fallback={<PageSpinner />}>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route index element={<Home />} />
+              <Route path="explore" element={<Explore />} />
+              <Route path="e/:slug" element={<EventPage />} />
+              <Route path="e/:slug/checkout" element={<Checkout />} />
+              <Route path="orders/:id" element={<OrderPage />} />
+              <Route path="tickets" element={<Tickets />} />
+              <Route path="tickets/:id" element={<TicketDetail />} />
+              <Route path="g/:slug" element={<OrgProfile />} />
+              <Route path="u/:username" element={<UserProfile />} />
+              <Route path="series/:id" element={<SeriesPage />} />
+              <Route path="saved" element={<Saved />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="kickbacks" element={<Kickbacks />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="platform" element={<Platform />} />
+              <Route path="help" element={<Help />} />
+              <Route path="terms/:doc" element={<Legal />} />
+              <Route path="app" element={<Simple kind="app" />} />
+              <Route path="vision" element={<Simple kind="vision" />} />
+              <Route path="careers" element={<Simple kind="careers" />} />
+              <Route path="login" element={<Login />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+            <Route path="create" element={<CreateEvent />} />
+            <Route path="scanner" element={<Scanner />} />
+            <Route path="dashboard" element={<DashboardLayout />}>
+              <Route index element={<Overview />} />
+              <Route path="events" element={<EventsList />} />
+              <Route path="events/:id" element={<EventManage />} />
+              <Route path="events/:id/:tab" element={<EventManage />} />
+              <Route path="insights" element={<Insights />} />
+              <Route path="sms" element={<Sms />} />
+              <Route path="finance" element={<Finance />} />
+              <Route path="settings" element={<OrgSettings />} />
+              <Route path="new-org" element={<NewOrg />} />
+            </Route>
+          </Routes>
+        </Suspense>
+      </RouteErrorBoundary>
     </HashRouter>
   );
 }

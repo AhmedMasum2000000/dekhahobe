@@ -502,7 +502,7 @@ export default function EventPage() {
       </div>
 
       {/* sticky CTA */}
-      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-line bg-white/95 backdrop-blur md:bottom-0">
+      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-line bg-white md:bottom-0">
         <div className="container-x flex items-center justify-between gap-3 py-3">
           <div className="hidden min-w-0 sm:block">
             <p className="truncate font-bold">{ev.title}</p>

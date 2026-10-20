@@ -5,6 +5,7 @@ import { api } from '@/api';
 import { useSession } from '@/store/session';
 import { useApi } from '@/hooks/useApi';
 import { Avatar, Logo } from './ui';
+import { RouteErrorBoundary } from './ErrorBoundary';
 
 const NAV = [
   { to: '/', label: 'Home', end: true },
@@ -63,7 +64,7 @@ export function TopNav() {
   useEffect(() => setOpen(false), [loc.pathname]);
   const link = ({ isActive }: { isActive: boolean }) => `rounded-full px-3.5 py-2 text-sm font-semibold transition ${isActive ? 'text-ink' : 'text-ink-3 hover:text-ink'}`;
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-white">
       <div className="h-1 bg-[linear-gradient(90deg,#FA02A3,#FED7EF_45%,#FA02A3_70%,#E3001B)]" aria-hidden />
       <div className="container-x flex h-16 items-center justify-between gap-3">
         <Link to="/" aria-label="B-POP TAGS home">
@@ -109,7 +110,7 @@ export function TabBar() {
   const user = useSession((s) => s.user);
   const tab = ({ isActive }: { isActive: boolean }) => `flex flex-1 flex-col items-center gap-1 py-2 text-[11px] font-semibold ${isActive ? 'text-ink' : 'text-ink-4'}`;
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="App tabs">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="App tabs">
       <div className="flex">
         <NavLink to="/explore" className={tab}><Compass className="h-6 w-6" />Explore</NavLink>
         <NavLink to="/tickets" className={tab}><Ticket className="h-6 w-6" />Tickets</NavLink>
@@ -178,7 +179,9 @@ export function AppLayout() {
     <div className="min-h-screen bg-white">
       <TopNav />
       <main className="pb-16 md:pb-0">
-        <Outlet />
+        <RouteErrorBoundary>
+          <Outlet />
+        </RouteErrorBoundary>
       </main>
       <Footer />
       <TabBar />
