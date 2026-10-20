@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-white text-ink antialiased font-sans; }
+  h1, h2, h3, h4 { @apply font-display tracking-tight; }
+  ::selection { @apply bg-brand-soft; }
+  :focus-visible { @apply outline-none ring-2 ring-ink ring-offset-2; }
+}
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition active:scale-[.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap; }
+  .btn-lg { @apply h-12 px-6 text-[15px]; }
+  .btn-md { @apply h-10 px-5 text-sm; }
+  .btn-sm { @apply h-8 px-3.5 text-[13px]; }
+  .btn-primary { @apply bg-ink text-white hover:bg-black/85; }
+  .btn-brand { @apply bg-brand text-white hover:bg-brand-dark; }
+  .btn-outline { @apply border border-line bg-white text-ink hover:bg-mist; }
+  .btn-ghost { @apply text-ink hover:bg-mist; }
+  .btn-danger { @apply bg-bad text-white hover:bg-red-700; }
+  .input { @apply h-11 w-full rounded-xl border border-line bg-white px-3.5 text-[15px] placeholder:text-ink-4 focus:border-ink focus:outline-none focus:ring-0; }
+  .textarea { @apply w-full rounded-xl border border-line bg-white px-3.5 py-3 text-[15px] placeholder:text-ink-4 focus:border-ink focus:outline-none; }
+  .label { @apply mb-1.5 block text-[13px] font-semibold text-ink-2; }
+  .card { @apply min-w-0 rounded-3xl border border-line bg-white; }
+  .chip { @apply inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-sm font-medium text-ink-2 hover:border-ink-4 whitespace-nowrap; }
+  .chip-on { @apply border-ink bg-ink text-white hover:border-ink; }
+  .muted { @apply text-ink-3; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .prose-bp p { @apply mb-3 leading-relaxed text-ink-2; }
+  .prose-bp strong { @apply font-semibold text-ink; }
+}
