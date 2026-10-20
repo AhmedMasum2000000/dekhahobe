@@ -1,4 +1,4 @@
--- Bpop Tags — production schema for the Supabase adapter.
+-- B-POP TAGS — production schema for the Supabase adapter.
 -- Mirrors src/api/types.ts. The browser demo (LocalAdapter) implements the same rules in TypeScript;
 -- here the money- and inventory-critical rules live in SECURITY DEFINER functions so clients can't bypass them.
 
@@ -28,7 +28,7 @@ create table organizations (
   avatar_url text,
   city text not null default 'Dhaka',
   instagram text,
-  website text,
+  website text check (website is null or website ~* '^https?://\S+$'),   -- blocks javascript: links
   contact_email text,
   verified boolean not null default false,
   created_at timestamptz not null default now()
@@ -153,7 +153,8 @@ create table kickback_offers (
 -- one active public offer per event
 create unique index one_public_offer on kickback_offers (event_id) where is_public and enabled;
 create table kickback_affiliates (offer_id uuid references kickback_offers on delete cascade, user_id uuid references profiles on delete cascade, primary key (offer_id, user_id));
-create table kickback_links (code text primary key, event_id uuid not null references events on delete cascade, offer_id uuid not null references kickback_offers, user_id uuid not null references profiles, visits int not null default 0, unique (event_id, user_id));
+-- one link per affiliate per offer: an invited affiliate keeps a private-rate link next to any public one
+create table kickback_links (code text primary key, event_id uuid not null references events on delete cascade, offer_id uuid not null references kickback_offers, user_id uuid not null references profiles, visits int not null default 0, unique (offer_id, user_id));
 
 create table tracking_links (id uuid primary key default gen_random_uuid(), event_id uuid not null references events on delete cascade, slug text not null, kind text not null default 'tracking' check (kind in ('tracking', 'host')), host_user_id uuid references profiles, visits int not null default 0, unique (event_id, slug));
 
@@ -183,6 +184,8 @@ create table orders (
   source text not null default 'online' check (source in ('online', 'door', 'comp', 'waitlist', 'transfer')),
   hold_expires_at timestamptz,
   refund_requested boolean not null default false,
+  refunded_amount numeric(10, 2) not null default 0,   -- paid back to the buyer so far (partial after transfers)
+  refunded_net numeric(10, 2) not null default 0,      -- organizer share reversed from the balance
   created_at timestamptz not null default now(),
   paid_at timestamptz
 );
@@ -192,11 +195,13 @@ create table tickets (
   id uuid primary key default gen_random_uuid(),
   code text unique not null,
   order_id uuid not null references orders,
+  origin_order_id uuid references orders,        -- the purchase a transferred ticket came from
   event_id uuid not null references events,
   ticket_type_id uuid not null references ticket_types,
   owner_id uuid not null references profiles,
   qr_nonce uuid not null default gen_random_uuid(),
   revoked_nonces uuid[] not null default '{}',   -- old QRs after a transfer scan as "Canceled"
+  revoked_codes text[] not null default '{}',    -- old printed codes after a transfer scan as "Canceled"
   status text not null default 'valid' check (status in ('valid', 'checked_in', 'cancelled', 'refunded')),
   is_comp boolean not null default false,
   transfer_to_phone text,
@@ -227,6 +232,18 @@ create table notifications (id uuid primary key default gen_random_uuid(), user_
 -- ---------------------------------------------------------------- helpers
 create or replace function team_role_for(p_org uuid) returns team_role language sql stable security definer as $$
   select role from team_members where org_id = p_org and user_id = auth.uid();
+$$;
+
+create or replace function event_role(p_event uuid) returns team_role language sql stable security definer as $$
+  select team_role_for((select org_id from events where id = p_event));
+$$;
+
+-- definer helpers so kickback policies can look at each other without recursing through RLS
+create or replace function offer_event(p_offer uuid) returns uuid language sql stable security definer as $$
+  select event_id from kickback_offers where id = p_offer;
+$$;
+create or replace function is_affiliate(p_offer uuid) returns boolean language sql stable security definer as $$
+  select exists (select 1 from kickback_affiliates where offer_id = p_offer and user_id = auth.uid());
 $$;
 
 create or replace function service_fee(p_price numeric) returns numeric language sql immutable as $$
@@ -264,6 +281,91 @@ alter publication supabase_realtime add table messages;
 
 alter table notifications enable row level security;
 create policy "own notifications" on notifications for all using (user_id = auth.uid());
+
+-- teams: owners manage everyone, admins manage non-owners, and an org always keeps an owner
+alter table team_members enable row level security;
+create policy "team visible to team" on team_members for select using (team_role_for(org_id) is not null);
+create policy "owners manage team" on team_members for all using (team_role_for(org_id) = 'owner') with check (team_role_for(org_id) = 'owner');
+create policy "admins manage non-owners" on team_members for all using (team_role_for(org_id) = 'admin' and role <> 'owner') with check (team_role_for(org_id) = 'admin' and role <> 'owner');
+create or replace function keep_an_owner() returns trigger language plpgsql as $$
+begin
+  if exists (select 1 from organizations where id = old.org_id) and not exists (select 1 from team_members where org_id = old.org_id and role = 'owner') then
+    raise exception 'An organization needs at least one owner.';
+  end if;
+  return null;
+end $$;
+create constraint trigger team_keeps_owner after update or delete on team_members deferrable initially deferred for each row execute function keep_an_owner();
+
+alter table scanner_pins enable row level security;
+create policy "managers manage pins" on scanner_pins for all using (team_role_for(org_id) in ('owner', 'admin')) with check (team_role_for(org_id) in ('owner', 'admin'));
+
+alter table payout_methods enable row level security;
+create policy "managers read payout accounts" on payout_methods for select using (team_role_for(org_id) in ('owner', 'admin'));
+create policy "owners write payout accounts" on payout_methods for all using (team_role_for(org_id) = 'owner') with check (team_role_for(org_id) = 'owner');
+
+-- social graph: public reads, you only write your own rows
+alter table follows_org enable row level security;
+create policy "org follows readable" on follows_org for select using (true);
+create policy "own org follows" on follows_org for all using (follower_id = auth.uid()) with check (follower_id = auth.uid());
+alter table follows_user enable row level security;
+create policy "user follows readable" on follows_user for select using (true);
+create policy "own user follows" on follows_user for all using (follower_id = auth.uid()) with check (follower_id = auth.uid());
+alter table blocks enable row level security;
+create policy "own blocks" on blocks for all using (blocker_id = auth.uid()) with check (blocker_id = auth.uid());
+alter table saved_events enable row level security;
+create policy "own saves" on saved_events for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- event configuration: visible with the event, written by owners/admins
+alter table ticket_groups enable row level security;
+create policy "groups follow event" on ticket_groups for select using (exists (select 1 from events e where e.id = event_id));
+create policy "managers write groups" on ticket_groups for all using (event_role(event_id) in ('owner', 'admin')) with check (event_role(event_id) in ('owner', 'admin'));
+alter table promo_codes enable row level security;   -- codes are secret; checkout validates them server-side
+create policy "managers manage promos" on promo_codes for all using (event_role(event_id) in ('owner', 'admin')) with check (event_role(event_id) in ('owner', 'admin'));
+alter table kickback_offers enable row level security;
+create policy "public offers readable" on kickback_offers for select using ((is_public and enabled) or event_role(event_id) is not null
+  or is_affiliate(id));
+create policy "managers write offers" on kickback_offers for all using (event_role(event_id) in ('owner', 'admin')) with check (event_role(event_id) in ('owner', 'admin'));
+alter table kickback_affiliates enable row level security;
+create policy "affiliate or managers read" on kickback_affiliates for select using (user_id = auth.uid() or event_role(offer_event(offer_id)) in ('owner', 'admin'));
+create policy "managers invite affiliates" on kickback_affiliates for all using (event_role(offer_event(offer_id)) in ('owner', 'admin')) with check (event_role(offer_event(offer_id)) in ('owner', 'admin'));
+alter table kickback_links enable row level security;   -- created by a server function
+create policy "own links or team" on kickback_links for select using (user_id = auth.uid() or event_role(event_id) is not null);
+alter table tracking_links enable row level security;
+create policy "team reads tracking" on tracking_links for select using (event_role(event_id) is not null);
+create policy "managers write tracking" on tracking_links for all using (event_role(event_id) in ('owner', 'admin')) with check (event_role(event_id) in ('owner', 'admin'));
+alter table guest_list enable row level security;
+create policy "team reads guest list" on guest_list for select using (event_role(event_id) is not null);
+create policy "door checks in guests" on guest_list for update using (event_role(event_id) is not null) with check (event_role(event_id) is not null);
+create policy "managers edit guest list" on guest_list for insert with check (event_role(event_id) in ('owner', 'admin'));
+create policy "managers remove guests" on guest_list for delete using (event_role(event_id) in ('owner', 'admin'));
+
+-- money: readable by the people involved, written only through the functions below
+alter table order_items enable row level security;
+create policy "items follow order" on order_items for select using (exists (select 1 from orders o where o.id = order_id));
+alter table waitlist enable row level security;
+create policy "own entries or team" on waitlist for select using (user_id = auth.uid() or event_role(event_id) in ('owner', 'admin', 'host'));
+alter table sms_blasts enable row level security;
+create policy "managers read blasts" on sms_blasts for select using (team_role_for(org_id) in ('owner', 'admin'));
+alter table payouts enable row level security;
+create policy "managers read payouts" on payouts for select using (team_role_for(org_id) in ('owner', 'admin'));
+
+-- platform-controlled columns: organizers can't self-verify, self-feature or edit view counts
+create or replace function protect_platform_columns() returns trigger language plpgsql as $$
+begin
+  if current_user in ('anon', 'authenticated') then
+    if tg_table_name = 'organizations' then
+      new.verified := case when tg_op = 'UPDATE' then old.verified else false end;
+    else
+      new.featured := case when tg_op = 'UPDATE' then old.featured else false end;
+      new.sponsored := case when tg_op = 'UPDATE' then old.sponsored else false end;
+      new.page_views := case when tg_op = 'UPDATE' then old.page_views else 0 end;
+      if tg_op = 'UPDATE' then new.org_id := old.org_id; end if;
+    end if;
+  end if;
+  return new;
+end $$;
+create trigger organizations_platform_columns before insert or update on organizations for each row execute function protect_platform_columns();
+create trigger events_platform_columns before insert or update on events for each row execute function protect_platform_columns();
 -- orders, tickets, waitlist and payouts are only written through the functions below.
 
 -- ---------------------------------------------------------------- inventory & checkout
@@ -309,7 +411,7 @@ end $$;
 
 -- called by the payment webhook (SSLCommerz IPN / bKash callback) after server-side validation
 create or replace function fulfill_order(p_order uuid, p_method text, p_ref text) returns void language plpgsql security definer as $$
-declare o orders; link kickback_links; off kickback_offers; elig numeric; elig_qty int; i order_items;
+declare o orders; link kickback_links; off kickback_offers; elig numeric; elig_qty int; base numeric; raw numeric; i order_items;
 begin
   update orders set status = case when exists (select 1 from order_items oi join ticket_types t on t.id = oi.ticket_type_id where oi.order_id = p_order and t.require_approval) then 'pending_approval' else 'paid' end,
     payment_method = p_method, payment_ref = p_ref, paid_at = now(), hold_expires_at = null
@@ -320,8 +422,12 @@ begin
     select * into link from kickback_links where code = o.kickback_code;
     select * into off from kickback_offers where id = link.offer_id and enabled;
     if found and link.user_id <> o.user_id then
-      select coalesce(sum(unit_price * qty), 0), coalesce(sum(qty), 0) into elig, elig_qty from order_items where order_id = o.id and (off.ticket_type_ids is null or ticket_type_id = any (off.ticket_type_ids));
-      update orders set kickback_commission = case when elig_qty = 0 then 0 when off.kind = 'percent' then round(elig * off.value / 100) when off.per = 'ticket' then off.value * elig_qty else off.value end where id = o.id;
+      -- free tickets never earn commission; the promo discount shrinks the base; never more than the organizer took in
+      select coalesce(sum(unit_price * qty), 0), coalesce(sum(qty), 0) into elig, elig_qty from order_items
+       where order_id = o.id and unit_price > 0 and (off.ticket_type_ids is null or ticket_type_id = any (off.ticket_type_ids));
+      base := case when o.subtotal > 0 then elig - o.discount * elig / o.subtotal else 0 end;
+      raw := case when elig_qty = 0 or o.total <= 0 then 0 when off.kind = 'percent' then round(base * off.value / 100) when off.per = 'ticket' then off.value * elig_qty else off.value end;
+      update orders set kickback_commission = greatest(0, least(raw, o.subtotal - o.discount)) where id = o.id;
     end if;
   end if;
   update waitlist set status = 'claimed' where order_id = o.id;
@@ -362,6 +468,11 @@ begin
     select * into t from tickets where id = tid;
   else
     select * into t from tickets where replace(code, '-', '') = upper(regexp_replace(p_payload, '[^A-Za-z0-9]', '', 'g'));
+    if not found then
+      -- a code printed before the ticket was transferred
+      select * into t from tickets where exists (select 1 from unnest(revoked_codes) c where replace(c, '-', '') = upper(regexp_replace(p_payload, '[^A-Za-z0-9]', '', 'g')));
+      if found then return case when t.event_id <> p_event then 'wrong_event' else 'cancelled' end; end if;
+    end if;
   end if;
   if not found then return 'invalid'; end if;
   if t.event_id <> p_event then return 'wrong_event'; end if;
@@ -383,7 +494,10 @@ begin
   insert into orders (event_id, user_id, buyer_name, buyer_phone, subtotal, fees, total, status, payment_method, source, paid_at)
   values (t.event_id, me.id, me.name, me.phone, 0, 0, 0, 'paid', 'free', 'transfer', now()) returning id into o;
   insert into order_items select o, t.ticket_type_id, name, 1, 0, 0 from ticket_types where id = t.ticket_type_id;
-  update tickets set owner_id = me.id, order_id = o, revoked_nonces = revoked_nonces || qr_nonce, qr_nonce = gen_random_uuid(), transfer_to_phone = null, transfer_created_at = null where id = t.id;
+  update tickets set owner_id = me.id, order_id = o, origin_order_id = coalesce(origin_order_id, t.order_id),
+    revoked_nonces = revoked_nonces || qr_nonce, qr_nonce = gen_random_uuid(),
+    revoked_codes = revoked_codes || code, code = upper(substr(md5(random()::text), 1, 4) || '-' || substr(md5(random()::text), 1, 4)),
+    transfer_to_phone = null, transfer_created_at = null where id = t.id;
 end $$;
 
 -- ---------------------------------------------------------------- discovery
@@ -393,3 +507,7 @@ create or replace function nearby_events(lat float, lng float, radius_km int def
     and st_dwithin(location, st_makepoint(lng, lat)::geography, radius_km * 1000)
   order by starts_at limit 100;
 $$;
+
+-- ---------------------------------------------------------------- privileges
+-- internal steps run only inside other functions, the payment webhook (service role) or pg_cron
+revoke execute on function reserve_seats(uuid, int), release_seats(uuid, int), process_waitlist(uuid), fulfill_order(uuid, text, text), housekeeping() from public, anon, authenticated;

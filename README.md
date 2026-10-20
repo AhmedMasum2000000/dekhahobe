@@ -1,12 +1,16 @@
-# Bpop Tags
+# B-POP TAGS
+
+*Bangla Pop Tags — curating pop-culture & the underground scene.* ([@bpop.tags](https://www.instagram.com/bpop.tags/))
 
 A social event-discovery and ticketing platform for Bangladesh — discover events, buy tickets with
 bKash / Nagad / card, transfer tickets, join waitlists, earn Kickbacks, and run events end to end from an
 organizer dashboard with a door scanner.
 
-Bpop Tags follows the page structure, user flows and feature set of Posh (see
-[`docs/REA-teardown.md`](docs/REA-teardown.md) for the reverse-engineering notes). It uses **original**
-branding, generated poster art and fictional Bangladeshi sample data — no Posh logos, photos or copy.
+B-POP TAGS follows the page structure, user flows and feature set of Posh (see
+[`docs/REA-teardown.md`](docs/REA-teardown.md) for the reverse-engineering notes). It uses the **B-POP TAGS**
+brand (logo, hot-pink palette, halftone/Y2K-star motifs and the Instagram content pillars: *Off the grid · On our
+radar*, *Here’s what you missed last week*, *We found art*), generated poster art and fictional Bangladeshi sample
+data — no Posh logos, photos or copy.
 
 > **Demo build.** Everything runs in your browser: data is stored in `localStorage`, payments and SMS are
 > simulated, nothing is charged. The code is structured so a real backend drops in later
@@ -53,7 +57,7 @@ npm run build
 ### Tests
 
 ```bash
-npx esbuild scripts/smoke.ts --bundle --platform=node --format=esm --outfile=/tmp/smoke.mjs && node /tmp/smoke.mjs   # 47 business-rule checks
+npx esbuild scripts/smoke.ts --bundle --platform=node --format=esm --outfile=/tmp/smoke.mjs && node /tmp/smoke.mjs   # 67 business-rule checks
 npm run build && npm run preview &   # then:
 npm run e2e                          # 32 browser checks across every flow (Playwright + Chromium)
 scripts/test-sql.sh                  # applies the Supabase migration to a local Postgres 16 and tests its functions

@@ -41,7 +41,7 @@ export function OrgProfile() {
           <div className="rounded-full border-4 border-white bg-white"><Avatar name={org.name} hue={org.avatarHue} url={org.avatarUrl} size={104} /></div>
           <FollowButton orgId={org.id} size="md" />
         </div>
-        <h1 className="mt-3 flex items-center gap-2 text-3xl font-black tracking-tight" data-testid="org-name">{org.name}{org.verified && <Verified className="h-6 w-6" />}</h1>
+        <h1 className="headline mt-3 flex items-center gap-2 text-5xl" data-testid="org-name">{org.name}{org.verified && <Verified className="h-6 w-6" />}</h1>
         <p className="text-ink-3">@{org.slug}</p>
         <p className="mt-2 text-sm font-semibold">{stats.events} events • {stats.attendees.toLocaleString()} attendees • {stats.followers.toLocaleString()} followers</p>
         {org.instagram && <a href={`https://instagram.com/${org.instagram}`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-ink-2"><Instagram className="h-4 w-4" />@{org.instagram}</a>}
@@ -51,7 +51,7 @@ export function OrgProfile() {
             {org.bio.length >= 110 && !bio && <button className="font-semibold" onClick={() => setBio(true)}>more</button>}
           </p>
         )}
-        {org.website && <a href={org.website} className="mt-1 inline-flex items-center gap-1 text-sm underline"><Globe className="h-4 w-4" />{org.website.replace(/^https?:\/\//, '')}</a>}
+        {org.website && /^https?:\/\//i.test(org.website) && <a href={org.website} target="_blank" rel="noreferrer noopener" className="mt-1 inline-flex items-center gap-1 text-sm underline"><Globe className="h-4 w-4" />{org.website.replace(/^https?:\/\//, '')}</a>}
         <div className="mt-8 border-t border-line pt-6">
           <h2 className="text-xl font-extrabold">Upcoming Events</h2>
           {upcoming.length ? upcoming.map((c) => <EventRow key={c.event.id} c={c} />) : <p className="py-4 text-sm text-ink-3">No upcoming events right now — follow to hear about the next one.</p>}
@@ -141,7 +141,7 @@ function SavedInner() {
   const { data, loading } = useApi(() => api.savedEvents(), []);
   return (
     <div className="container-x pb-16 pt-8">
-      <h1 className="text-4xl font-black tracking-tight">Saved events</h1>
+      <h1 className="headline text-5xl">Saved events</h1>
       {loading && !data ? <PageSpinner /> : data?.length ? (
         <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">{data.map((c) => <EventCard key={c.event.id} card={c} />)}</div>
       ) : (
@@ -160,7 +160,7 @@ function NotificationsInner() {
   return (
     <div className="container-x max-w-2xl pb-16 pt-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-black tracking-tight">Activity</h1>
+        <h1 className="headline text-5xl">Activity</h1>
         {unread && <button className="text-sm font-semibold underline" onClick={() => api.markNotificationsRead()}>Mark all read</button>}
       </div>
       <div className="mt-6 divide-y divide-line">
@@ -184,7 +184,7 @@ function KickbacksInner() {
   const { data } = useApi(() => api.myKickbacks(), []);
   return (
     <div className="container-x max-w-3xl pb-16 pt-8">
-      <h1 className="text-4xl font-black tracking-tight">Kickbacks</h1>
+      <h1 className="headline text-5xl">Kickbacks</h1>
       <p className="mt-2 text-ink-3">Share events with your personal link and earn when friends buy tickets.</p>
       <div className="mt-6 rounded-3xl bg-ink p-6 text-white">
         <p className="text-sm opacity-70">Total earned</p>
@@ -236,7 +236,7 @@ function SettingsInner() {
   };
   return (
     <div className="container-x max-w-xl pb-16 pt-8">
-      <h1 className="text-4xl font-black tracking-tight">Settings</h1>
+      <h1 className="headline text-5xl">Settings</h1>
       <section className="card mt-6 space-y-4 p-5">
         <div className="flex items-center gap-4">
           <Avatar name={user.name} hue={user.avatarHue} url={user.avatarUrl} size={64} />

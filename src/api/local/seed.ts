@@ -78,7 +78,7 @@ const CAT_HUES: Record<Category, [number, number]> = {
   Networking: [210, 240],
   Comedy: [45, 0],
 };
-const STYLES: Poster['style'][] = ['gradient', 'sun', 'grid', 'wave', 'type'];
+const STYLES: Poster['style'][] = ['zine', 'gradient', 'sun', 'grid', 'wave', 'type'];
 
 const ORGS: Omit<Organization, 'id' | 'team' | 'scannerPins' | 'payoutMethods' | 'createdAt' | 'slug'>[] = [
   { name: 'Dhaka Sound Collective', bio: 'Warehouse nights, rooftop sunsets and the best of Dhaka electronic & indie. Building the city’s dance-floor family since 2019.', avatarHue: 300, bannerSeed: 11, verified: true, city: 'Dhaka', instagram: 'dhakasoundcollective', contactEmail: 'hello@dsc.example' },

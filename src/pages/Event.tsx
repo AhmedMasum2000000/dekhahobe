@@ -89,7 +89,7 @@ function TicketSheet({ ev, open, onClose, preferredTier }: { ev: BpopEvent; open
           <p className="text-[15px] font-semibold text-ink-2">{tt.price === 0 ? 'Free' : tk(displayPrice(tt.price))}{tt.price > 0 && <span className="ml-1 text-xs font-normal text-ink-4">incl. fees</span>}</p>
           {tt.description && <p className="mt-1 text-[13px] text-ink-3">{tt.description}</p>}
           {tt.requireApproval && <p className="mt-1 text-[12px] font-semibold text-warn">Requires organizer approval</p>}
-          {st.label && st.kind === 'open' && <p className="mt-1 text-[12px] font-semibold text-brand">{st.label}</p>}
+          {st.label && st.kind === 'open' && <p className="mt-1 text-[12px] font-semibold text-brand-dark">{st.label}</p>}
         </div>
         <div className="shrink-0">
           {st.kind === 'open' ? (
@@ -360,7 +360,7 @@ export default function EventPage() {
           <div className="min-w-0 space-y-8">
             <div className="space-y-3">
               {ev.status !== 'published' && <Badge tone={ev.status === 'draft' ? 'warn' : 'bad'}>{ev.status === 'draft' ? 'Draft — only your team can see this' : 'Cancelled'}</Badge>}
-              <h1 className="text-[34px] font-black leading-[1.05] tracking-tight sm:text-5xl" data-testid="event-title">{ev.title}</h1>
+              <h1 className="headline text-[44px] sm:text-6xl" data-testid="event-title">{ev.title}</h1>
               <p className="text-lg font-semibold">{ev.venue.revealLater && !holder ? 'Location revealed to ticket holders' : ev.venue.name}</p>
               <p className="flex items-center gap-2 text-ink-2"><Clock className="h-4 w-4" />{longRange(ev.startsAt, ev.endsAt)}</p>
               <Link to={`/g/${org.slug}`} className="inline-flex items-center gap-2 rounded-full border border-line py-1 pl-1 pr-3 text-sm font-semibold hover:bg-mist">
@@ -494,7 +494,7 @@ export default function EventPage() {
               <div>
                 <p className="font-bold">Get the app for more features</p>
                 <p className="text-sm text-ink-3">Instant ticket access · Easy ticket transfers · Curated for you</p>
-                <Link to="/app" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">Download Bpop Tags</Link>
+                <Link to="/app" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">Download B-POP TAGS</Link>
               </div>
             </section>
           </div>

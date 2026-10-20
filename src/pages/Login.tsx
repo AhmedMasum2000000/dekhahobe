@@ -182,7 +182,7 @@ export default function Login() {
         {step === 'profile' && (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveProfile(); }}>
             <div>
-              <h1 className="text-3xl font-black tracking-tight">Welcome to Bpop</h1>
+              <h1 className="text-3xl font-black tracking-tight">Welcome to B-POP</h1>
               <p className="mt-2 text-ink-3">Tell us a bit about you.</p>
             </div>
             <Field label="Full name"><input className="input" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} autoFocus data-testid="profile-name" /></Field>

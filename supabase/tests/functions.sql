@@ -22,6 +22,7 @@ insert into orders (id, event_id, user_id, buyer_name, buyer_phone, subtotal, fe
 insert into order_items values ('50000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'GA', 2, 1800, service_fee(1800));
 select fulfill_order('50000000-0000-0000-0000-000000000001', 'bkash', 'TX1');
 select status, kickback_commission, (select uses from promo_codes where code = 'MONSOON10') as promo_uses, (select count(*) from tickets where order_id = o.id) as tickets from orders o where id = '50000000-0000-0000-0000-000000000001';
+do $$ begin assert (select kickback_commission from orders where id = '50000000-0000-0000-0000-000000000001') = 162, 'kickback is 5% of the discounted 3240'; end $$;
 select fulfill_order('50000000-0000-0000-0000-000000000001', 'bkash', 'TX1') as idempotent_second_call;
 select count(*) as still_two_tickets from tickets;
 
@@ -33,12 +34,17 @@ select check_in('20000000-0000-0000-0000-000000000001', 'ZZZZ-ZZZZ', 'door') as 
 
 -- transfer the unscanned ticket to Tanvir
 update tickets set transfer_to_phone = '+8801911222333' where status = 'valid';
-create temp table before as select id, qr_nonce from tickets where status = 'valid';
+create temp table before as select id, qr_nonce, code from tickets where status = 'valid';
 set test.uid = '00000000-0000-0000-0000-00000000000c';
 select accept_transfer((select id from before));
 select owner_id = '00000000-0000-0000-0000-00000000000c' as tanvir_owns, qr_nonce <> (select qr_nonce from before) as new_qr from tickets where id = (select id from before);
 set test.uid = '00000000-0000-0000-0000-00000000000a';
 select check_in('20000000-0000-0000-0000-000000000001', 'BPOP:' || id || ':' || qr_nonce, 'door') as old_qr from before;
+do $$ begin
+  assert (select code from tickets where id = (select id from before)) <> (select code from before), 'transfer rotates the printed code';
+  assert check_in('20000000-0000-0000-0000-000000000001', (select code from before), 'door') = 'cancelled', 'old printed code scans as cancelled';
+  assert (select origin_order_id from tickets where id = (select id from before)) = '50000000-0000-0000-0000-000000000001', 'origin order kept';
+end $$;
 
 -- hold expiry: Rafi holds the last seat, then it expires while Nusrat waits
 insert into waitlist (event_id, ticket_type_id, user_id, qty) values ('20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000b', 1);
@@ -50,3 +56,35 @@ select housekeeping();
 select status from orders where id = '50000000-0000-0000-0000-000000000002';
 select sold, held_for_waitlist from ticket_types;
 select status, offer_expires_at > now() as offer_live from waitlist;
+
+-- ---------------------------------------------------------------- RLS & privileges (as the API role)
+insert into team_members values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000c', 'admin');
+grant usage on schema public to anon, authenticated;
+set role authenticated;
+set test.uid = '00000000-0000-0000-0000-00000000000b';   -- Nusrat, attendee
+do $$ begin
+  assert (select count(*) from promo_codes) = 0, 'attendees cannot read promo codes';
+  assert (select count(*) from payout_methods) = 0, 'attendees cannot read payout accounts';
+  begin perform housekeeping(); raise exception 'housekeeping should not be callable'; exception when insufficient_privilege then null; end;
+  begin perform fulfill_order('50000000-0000-0000-0000-000000000002', 'bkash', 'free'); raise exception 'fulfill_order should not be callable'; exception when insufficient_privilege then null; end;
+end $$;
+set test.uid = '00000000-0000-0000-0000-00000000000c';   -- Tanvir, admin
+do $$ begin
+  assert (select count(*) from promo_codes) = 1, 'admins manage promo codes';
+  begin insert into team_members values ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000d', 'owner'); raise exception 'admin added an owner';
+  exception when insufficient_privilege then null; end;
+  begin insert into payout_methods (org_id, kind, label) values ('10000000-0000-0000-0000-000000000001', 'bkash', 'bKash 9999'); raise exception 'admin added a payout account';
+  exception when insufficient_privilege then null; end;
+  update organizations set verified = true, name = 'DSC' where id = '10000000-0000-0000-0000-000000000001';
+  assert (select not verified and name = 'DSC' from organizations where id = '10000000-0000-0000-0000-000000000001'), 'profile edits allowed, self-verify ignored';
+  begin update organizations set website = 'javascript:alert(1)' where id = '10000000-0000-0000-0000-000000000001'; raise exception 'unsafe website saved';
+  exception when check_violation then null; end;
+end $$;
+set test.uid = '00000000-0000-0000-0000-00000000000a';   -- Rafi, the only owner
+do $$ begin
+  set constraints team_keeps_owner immediate;
+  begin delete from team_members where user_id = '00000000-0000-0000-0000-00000000000a'; raise exception 'last owner removed';
+  exception when raise_exception then if sqlerrm not like '%at least one owner%' then raise; end if; end;
+end $$;
+reset role;
+select 'sql tests passed' as result;

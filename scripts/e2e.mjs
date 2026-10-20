@@ -52,7 +52,7 @@ async function login(phone, name) {
   await go('/login');
   await tid('phone-input').fill(phone);
   await tid('send-code').click();
-  const code = await lastSmsCode(/(\d{6}) is your Bpop Tags/);
+  const code = await lastSmsCode(/(\d{6}) is your B-POP TAGS/);
   for (let i = 0; i < 6; i++) await tid(`otp-${i}`).fill(code[i]);
   if (name) {
     await tid('profile-name').waitFor();
@@ -94,7 +94,7 @@ try {
   await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await page.reload();
   await page.waitForLoadState('networkidle');
-  ok(await page.getByText('Find your scene.').isVisible(), 'home renders');
+  ok(await page.getByTestId('hero-title').isVisible(), 'home renders');
   await shot('01-home');
 
   // ---- A. OTP login

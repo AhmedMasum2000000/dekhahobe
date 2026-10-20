@@ -92,7 +92,7 @@ function TicketsInner() {
           <div key={w.id} className="card flex items-center justify-between gap-3 p-4" data-testid="waitlist-entry">
             <div className="min-w-0">
               <p className="truncate font-semibold">{w.event.title}</p>
-              <p className="text-[13px] text-ink-3">{w.qty} × {w.ticketType.name} · {w.status === 'offered' ? <span className="font-semibold text-brand">Offer expires in <Countdown until={w.offerExpiresAt!} /></span> : 'Waiting in line'}</p>
+              <p className="text-[13px] text-ink-3">{w.qty} × {w.ticketType.name} · {w.status === 'offered' ? <span className="font-semibold text-brand-dark">Offer expires in <Countdown until={w.offerExpiresAt!} /></span> : 'Waiting in line'}</p>
             </div>
             {w.status === 'offered' ? <Link to={`/e/${w.event.slug}?offer=${w.id}`} className="btn btn-brand btn-sm">Claim</Link> : <button className="btn btn-outline btn-sm" onClick={() => api.leaveWaitlist(w.id)}>Leave</button>}
           </div>
@@ -203,7 +203,7 @@ function TicketDetailInner() {
               </label>
             ))}
           </div>
-          <Field label="Recipient’s mobile number" hint="If they’re new to Bpop Tags, they’ll get a text to sign up and accept.">
+          <Field label="Recipient’s mobile number" hint="If they’re new to B-POP TAGS, they’ll get a text to sign up and accept.">
             <input className="input" inputMode="tel" placeholder="01XXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} data-testid="transfer-phone" />
           </Field>
           <p className="rounded-xl bg-mist p-3 text-[13px] text-ink-2">Heads up: transferred tickets are non-refundable, and your QR code for them will stop working once accepted.</p>

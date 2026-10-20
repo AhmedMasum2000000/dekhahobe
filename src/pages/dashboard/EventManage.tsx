@@ -274,7 +274,7 @@ function TicketsTab({ ev }: { ev: BpopEvent }) {
                   {t.hidden && <Badge>Hidden</Badge>}{t.password && <Badge tone="brand"><Lock className="h-3 w-3" />Password</Badge>}{t.inPersonOnly && <Badge>In-person only</Badge>}{t.requireApproval && <Badge tone="warn">Approval</Badge>}{t.waitlistEnabled && <Badge tone="brand">Waitlist</Badge>}{t.markedSoldOut && <Badge tone="bad">Marked sold out</Badge>}{!t.allowTransfers && <Badge>No transfers</Badge>}
                 </div>
               </div>
-              <div className="text-right text-sm"><p className="font-semibold">{t.sold}{t.quantity !== null ? ` / ${t.quantity}` : ' sold'}</p>{t.heldForWaitlist > 0 && <p className="text-xs text-brand">{t.heldForWaitlist} held for waitlist</p>}</div>
+              <div className="text-right text-sm"><p className="font-semibold">{t.sold}{t.quantity !== null ? ` / ${t.quantity}` : ' sold'}</p>{t.heldForWaitlist > 0 && <p className="text-xs text-brand-dark">{t.heldForWaitlist} held for waitlist</p>}</div>
             </button>
           ))}
         </div>
@@ -404,10 +404,10 @@ function OrdersTab({ ev, manager }: { ev: BpopEvent; manager: boolean }) {
                 <td className="p-3"><p className="font-semibold">{o.buyer.name}</p><p className="text-xs text-ink-3">{prettyPhone(o.buyer.phone)}</p></td>
                 <td className="p-3">{o.items.map((i) => `${i.qty}× ${i.name}`).join(', ')}{o.promoCode && <Badge className="ml-1">{o.promoCode}</Badge>}{o.kickbackCode && <Badge tone="brand" className="ml-1">via {o.kickbackCode}</Badge>}</td>
                 <td className="p-3 font-semibold">{tk(o.total)}<p className="text-xs font-normal text-ink-3">{o.paymentMethod}</p></td>
-                <td className="p-3"><Badge tone={o.status === 'paid' ? 'ok' : o.status === 'pending_approval' ? 'warn' : 'neutral'}>{o.status.replace('_', ' ')}</Badge>{o.refundRequested && o.status === 'paid' && <Badge tone="bad" className="ml-1">refund requested</Badge>}</td>
+                <td className="p-3"><Badge tone={o.status === 'paid' ? 'ok' : o.status === 'pending_approval' ? 'warn' : 'neutral'}>{o.status.replace('_', ' ')}</Badge>{o.refundRequested && o.status === 'paid' && <Badge tone="bad" className="ml-1">refund requested</Badge>}{o.status === 'paid' && (o.refundedAmount ?? 0) > 0 && <Badge className="ml-1">{tk(o.refundedAmount!)} refunded</Badge>}</td>
                 <td className="p-3 text-right">
                   {manager && o.status === 'pending_approval' && <span className="flex justify-end gap-1"><button className="btn btn-primary btn-sm" data-testid="approve" onClick={() => api.approveOrder(o.id, true).then(() => toast.success('Approved — tickets issued'), toast.error)}><Check className="h-4 w-4" /></button><button className="btn btn-outline btn-sm" onClick={() => api.approveOrder(o.id, false).then(() => toast.info('Declined'), toast.error)}><X className="h-4 w-4" /></button></span>}
-                  {manager && o.status === 'paid' && o.total > 0 && <button className="btn btn-outline btn-sm" onClick={() => { if (confirm(`Refund ${tk(o.total)} to ${o.buyer.name}?`)) api.refundOrder(o.id).then(() => toast.success('Refunded'), toast.error); }}>Refund</button>}
+                  {manager && o.status === 'paid' && o.total - (o.refundedAmount ?? 0) > 0 && <button className="btn btn-outline btn-sm" onClick={() => { if (confirm(`Refund up to ${tk(o.total - (o.refundedAmount ?? 0))} to ${o.buyer.name}? Only tickets they still hold are refunded — transferred tickets stay valid.`)) api.refundOrder(o.id).then(() => toast.success('Refunded'), toast.error); }}>Refund</button>}
                 </td>
               </tr>
             ))}

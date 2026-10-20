@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Compass, Heart, LayoutDashboard, LogOut, Menu, Plus, ScanLine, Settings, Ticket, User as UserIcon, Wallet, X } from 'lucide-react';
+import { Bell, Compass, Heart, Instagram, LayoutDashboard, LogOut, Menu, Plus, ScanLine, Settings, Ticket, User as UserIcon, Wallet, X } from 'lucide-react';
 import { api } from '@/api';
 import { useSession } from '@/store/session';
 import { useApi } from '@/hooks/useApi';
@@ -64,8 +64,9 @@ export function TopNav() {
   const link = ({ isActive }: { isActive: boolean }) => `rounded-full px-3.5 py-2 text-sm font-semibold transition ${isActive ? 'text-ink' : 'text-ink-3 hover:text-ink'}`;
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-white/90 backdrop-blur-md">
+      <div className="h-1 bg-[linear-gradient(90deg,#FA02A3,#FED7EF_45%,#FA02A3_70%,#E3001B)]" aria-hidden />
       <div className="container-x flex h-16 items-center justify-between gap-3">
-        <Link to="/" aria-label="Bpop Tags home">
+        <Link to="/" aria-label="B-POP TAGS home">
           <Logo />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
@@ -113,7 +114,7 @@ export function TabBar() {
         <NavLink to="/explore" className={tab}><Compass className="h-6 w-6" />Explore</NavLink>
         <NavLink to="/tickets" className={tab}><Ticket className="h-6 w-6" />Tickets</NavLink>
         <NavLink to="/create" className={tab}>
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-ink text-white"><Plus className="h-4 w-4" /></span>Create
+          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand text-white"><Plus className="h-4 w-4" /></span>Create
         </NavLink>
         <NavLink to="/notifications" className={tab}><Bell className="h-6 w-6" />Activity</NavLink>
         <NavLink to={user ? `/u/${user.username}` : '/login'} className={tab}><UserIcon className="h-6 w-6" />Profile</NavLink>
@@ -129,7 +130,8 @@ export function Footer() {
       <div className="container-x py-14">
         <div className="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl">Dekha hobe.</h2>
+            <p className="stamp text-brand-dark">You are on our radar</p>
+            <h2 className="headline mt-3 text-6xl sm:text-7xl">Dekha <span className="text-brand">hobe.</span></h2>
             <p className="mt-2 text-ink-3">See you out there.</p>
           </div>
           <div className="flex gap-2">
@@ -140,7 +142,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div className={col}>
             <Logo />
-            <p className="mt-2 max-w-[16rem]">The social home for IRL experiences across Bangladesh.</p>
+            <p className="mt-2 max-w-[16rem]">Bangla Pop Tags — curating pop-culture &amp; the underground scene across Bangladesh.</p>
           </div>
           <div className={col}>
             <p className="font-semibold text-ink">Company</p>
@@ -158,12 +160,12 @@ export function Footer() {
           </div>
           <div className={col}>
             <p className="font-semibold text-ink">Social</p>
-            <a href="#/" onClick={(e) => e.preventDefault()}>Instagram</a>
-            <a href="#/" onClick={(e) => e.preventDefault()}>Facebook</a>
-            <a href="#/" onClick={(e) => e.preventDefault()}>TikTok</a>
+            <a href="https://www.instagram.com/bpop.tags/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5"><Instagram className="h-4 w-4" />@bpop.tags</a>
+            <a href="https://linktr.ee/bpoptags" target="_blank" rel="noreferrer">linktr.ee/bpoptags</a>
+            <Link to="/help">Contact</Link>
           </div>
         </div>
-        <p className="mt-12 text-xs text-ink-4">© {new Date().getFullYear()} Bpop Tags. Demo build — payments are simulated and data is stored in your browser.</p>
+        <p className="mt-12 text-xs text-ink-4">© {new Date().getFullYear()} B-POP TAGS (Bangla Pop Tags). Demo build — payments are simulated and data is stored in your browser.</p>
       </div>
     </footer>
   );

@@ -153,7 +153,7 @@ export function icsFor(e: { title: string; startsAt: string; endsAt: string; ven
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Bpop Tags//EN',
+    'PRODID:-//B-POP TAGS//EN',
     'BEGIN:VEVENT',
     `UID:${e.slug}@bpoptags`,
     `DTSTAMP:${z(new Date().toISOString())}`,

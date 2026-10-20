@@ -64,7 +64,7 @@ export function Overview() {
           {s.pendingBalance > 0 && <p className="text-sm text-ink-3">{tk(s.pendingBalance)} pending approval</p>}
           <Link to="/dashboard/finance" className="btn btn-primary btn-md mt-4 w-full"><Zap className="h-4 w-4" />Instant payout</Link>
           <div className="mt-6 rounded-2xl bg-mist p-4">
-            <p className="flex items-center gap-2 text-sm font-bold"><Bot className="h-4 w-4" />Ask Bpop AI <Badge tone="brand">beta</Badge></p>
+            <p className="flex items-center gap-2 text-sm font-bold"><Bot className="h-4 w-4" />Ask B-POP AI <Badge tone="brand">beta</Badge></p>
             <p className="mt-1 text-[13px] text-ink-3">“Which event performed best?”</p>
             <Link to="/dashboard/insights" className="mt-2 inline-block text-sm font-semibold underline">Ask a question</Link>
           </div>
@@ -179,7 +179,7 @@ export function Insights() {
         </div>
       </div>
       <div className="card p-5">
-        <h2 className="flex items-center gap-2 font-bold"><Bot className="h-5 w-5" />Ask Bpop AI <Badge tone="brand">beta</Badge></h2>
+        <h2 className="flex items-center gap-2 font-bold"><Bot className="h-5 w-5" />Ask B-POP AI <Badge tone="brand">beta</Badge></h2>
         <p className="text-sm text-ink-3">Answers come from your own event data.</p>
         <div className="mt-4 space-y-3" data-testid="ai-chat">
           {chat.map((c, i) => (
@@ -272,6 +272,7 @@ export function Finance() {
           <p className="text-sm text-ink-3">Available balance</p>
           <p className="font-display text-4xl font-extrabold" data-testid="balance">{tk(s.balance)}</p>
           {s.pendingBalance > 0 && <p className="text-sm text-ink-3">+ {tk(s.pendingBalance)} pending approval</p>}
+          {s.doorCollected > 0 && <p className="text-sm text-ink-3" data-testid="door-collected">{tk(s.doorCollected)} collected at the door — already in your hands, so it isn’t part of this balance.</p>}
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
             <Field label="Amount (৳)"><input className="input" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} placeholder="e.g. 25000" data-testid="payout-amount" /></Field>
             <div className="flex items-end gap-2">
@@ -289,7 +290,8 @@ export function Finance() {
           <h2 className="font-bold">Payout accounts</h2>
           {org.payoutMethods.map((p) => <p key={p.id} className="mt-3 flex items-center justify-between text-sm"><span>{p.label}</span>{p.primary && <Badge>Primary</Badge>}</p>)}
           {!org.payoutMethods.length && <p className="mt-2 text-sm text-ink-3">Add an account to get paid.</p>}
-          <button className="btn btn-outline btn-sm mt-4" onClick={() => setAddMethod(true)}><Plus className="h-4 w-4" />Add account</button>
+          <button className="btn btn-outline btn-sm mt-4" disabled={role !== 'owner'} onClick={() => setAddMethod(true)}><Plus className="h-4 w-4" />Add account</button>
+          {role !== 'owner' && <p className="mt-2 text-xs text-ink-3">Only owners can change payout accounts.</p>}
         </div>
       </div>
       <div className="card p-5">

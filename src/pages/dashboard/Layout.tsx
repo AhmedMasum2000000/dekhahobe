@@ -59,10 +59,10 @@ function Onboarding() {
     <div className="flex min-h-screen items-center justify-center bg-mist px-4">
       <div className="card w-full max-w-md p-6">
         <Logo />
-        <h1 className="mt-6 text-3xl font-black tracking-tight">Start hosting on Bpop</h1>
+        <h1 className="mt-6 text-3xl font-black tracking-tight">Start hosting on B-POP</h1>
         <p className="mb-6 mt-2 text-ink-3">Create your organization to publish events, sell tickets and get paid.</p>
         <CreateOrgForm onDone={(o) => setOrg(o.id)} />
-        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-ink-3 underline">Back to Bpop</Link>
+        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-ink-3 underline">Back to B-POP</Link>
       </div>
     </div>
   );

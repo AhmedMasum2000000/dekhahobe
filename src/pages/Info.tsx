@@ -22,7 +22,7 @@ export function Platform() {
     Comedy: ['laugh-lab-bd'],
   };
   const quotes: Record<string, string> = {
-    'dhaka-sound-collective': 'Bpop took us from one warehouse night a month to a weekly series with a waitlist every time.',
+    'dhaka-sound-collective': 'B-POP took us from one warehouse night a month to a weekly series with a waitlist every time.',
     'rooftop-sessions': 'Sixty seats, sold out in minutes — and the waitlist means nobody gets scalped.',
     'coxs-wave-fest': 'Kickbacks turned our first-year festival-goers into our best marketing team.',
     'rajshahi-mango-mela': 'Free RSVPs, a guest list and the door scanner — that’s all we needed to run our riverside mela.',
@@ -39,9 +39,9 @@ export function Platform() {
 
   const block = (n: string, k: string, title: string, sub: string, items: { icon: React.ReactNode; t: string }[]) => (
     <section className="container-x mt-24">
-      <p className="text-sm font-bold text-brand">{n}</p>
+      <p className="text-sm font-bold text-brand-dark">{n}</p>
       <p className="text-sm font-semibold text-ink-3">{k}</p>
-      <h2 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">{title}</h2>
+      <h2 className="headline mt-1 text-5xl sm:text-6xl">{title}</h2>
       <p className="mt-3 max-w-xl text-ink-2">{sub}</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {items.map((i) => (
@@ -58,11 +58,11 @@ export function Platform() {
   return (
     <div className="pb-10">
       <section className="container-x pt-14 text-center">
-        <h1 className="mx-auto max-w-3xl text-5xl font-black leading-[0.95] tracking-tighter sm:text-7xl">Build your scene on Bpop</h1>
+        <h1 className="headline mx-auto max-w-3xl text-6xl sm:text-8xl">Build your scene on B-POP</h1>
         <p className="mx-auto mt-5 max-w-xl text-lg text-ink-2">The tools you need to create, sell out and grow any experience in Bangladesh.</p>
         <div className="mt-7 flex justify-center gap-2">
           <Link to="/create" className="btn btn-primary btn-lg">Get started</Link>
-          <a href="mailto:partners@bpoptags.example?subject=Bpop%20demo" className="btn btn-outline btn-lg">Book a demo</a>
+          <a href="mailto:partners@bpoptags.example?subject=B-POP%20demo" className="btn btn-outline btn-lg">Book a demo</a>
         </div>
         {data && (
           <div className="mx-auto mt-12 grid max-w-3xl grid-cols-3 gap-4">
@@ -74,7 +74,7 @@ export function Platform() {
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {data?.orgs.slice(0, 8).map((o) => <Link key={o.org.id} to={`/g/${o.org.slug}`} title={o.org.name}><Avatar name={o.org.name} hue={o.org.avatarHue} size={48} /></Link>)}
         </div>
-        <p className="mt-4 text-sm text-ink-3">Bpop is built for every kind of community.</p>
+        <p className="mt-4 text-sm text-ink-3">B-POP is built for every kind of community.</p>
       </section>
 
       <section className="container-x mt-20">
@@ -88,7 +88,7 @@ export function Platform() {
             </div>
           </div>
           <div className="mt-6 text-center">
-            <h2 className="text-3xl font-black tracking-tight">Grow your events with the Bpop Organizer Dashboard</h2>
+            <h2 className="text-3xl font-black tracking-tight">Grow your events with the B-POP Organizer Dashboard</h2>
             <Link to="/dashboard" className="btn btn-primary btn-lg mt-5">Open the dashboard</Link>
           </div>
         </div>
@@ -105,7 +105,7 @@ export function Platform() {
         { icon: <MessageSquare className="h-5 w-5" />, t: 'Send unlimited free SMS blasts to re-engage your audience.' },
       ])}
       {block('03', 'Scale', 'Turn your community into culture', 'Make data-backed decisions with real-time insights.', [
-        { icon: <Bot className="h-5 w-5" />, t: 'Ask Bpop AI any question about your event’s performance (beta).' },
+        { icon: <Bot className="h-5 w-5" />, t: 'Ask B-POP AI any question about your event’s performance (beta).' },
         { icon: <BarChart3 className="h-5 w-5" />, t: 'Access rich organization insights to stay on top of your data.' },
         { icon: <Users className="h-5 w-5" />, t: 'Team roles, door scanner PINs and host links for your whole crew.' },
       ])}
@@ -139,9 +139,9 @@ const LEGAL: Record<string, { title: string; body: string[] }> = {
   'terms-of-service': {
     title: 'Terms of Service',
     body: [
-      'Bpop Tags (“Bpop”) provides a platform for organizers to list events and for attendees to discover them and buy tickets. Organizers are responsible for their events, including permits, venue safety, age restrictions and the accuracy of event information.',
+      'B-POP TAGS (“B-POP”) provides a platform for organizers to list events and for attendees to discover them and buy tickets. Organizers are responsible for their events, including permits, venue safety, age restrictions and the accuracy of event information.',
       'Tickets are licences to attend an event and may be scanned once. Tickets may be transferred only where the organizer allows it. Resale above face value is not supported.',
-      'Prices are shown upfront and include Bpop’s service fee. Payments are processed by licensed payment partners (bKash, Nagad, card acquirers).',
+      'Prices are shown upfront and include B-POP’s service fee. Payments are processed by licensed payment partners (bKash, Nagad, card acquirers).',
       'This is a demo build: no payments are processed and all data is stored locally in your browser.',
     ],
   },
@@ -178,7 +178,7 @@ export function Legal() {
   if (!d) return <div className="container-x py-20"><Empty title="Page not found" /></div>;
   return (
     <div className="container-x max-w-2xl py-12">
-      <h1 className="text-4xl font-black tracking-tight">{d.title}</h1>
+      <h1 className="headline text-5xl">{d.title}</h1>
       <p className="mt-1 text-sm text-ink-3">Last updated {new Date().getFullYear()}</p>
       <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-ink-2">{d.body.map((p) => <p key={p}>{p}</p>)}</div>
       <div className="mt-8 flex flex-wrap gap-3 text-sm">{Object.entries(LEGAL).map(([k, v]) => <Link key={k} to={`/terms/${k}`} className="underline">{v.title}</Link>)}</div>
@@ -199,7 +199,7 @@ const FAQ: [string, string][] = [
 export function Help() {
   return (
     <div className="container-x max-w-2xl py-12">
-      <h1 className="text-4xl font-black tracking-tight">Help center</h1>
+      <h1 className="headline text-5xl">Help center</h1>
       <p className="mt-2 text-ink-3">Answers for attendees and organizers.</p>
       <div className="mt-8 divide-y divide-line">
         {FAQ.map(([q, a]) => (
@@ -216,13 +216,13 @@ export function Help() {
 
 export function Simple({ kind }: { kind: 'app' | 'vision' | 'careers' }) {
   const content = {
-    app: { t: 'Get the Bpop Tags app', b: 'Instant ticket access, easy transfers and a feed curated for you. This web app works on any phone — add it to your home screen from your browser’s share menu.' },
+    app: { t: 'Get the B-POP TAGS app', b: 'Instant ticket access, easy transfers and a feed curated for you. This web app works on any phone — add it to your home screen from your browser’s share menu.' },
     vision: { t: 'Our vision', b: 'Bangladesh has one of the youngest, most social populations on earth. We’re building the place where that energy turns into real-life plans — and where the people who create those moments can make a living from them.' },
     careers: { t: 'Careers', b: 'We’re a small team in Dhaka building for the culture. No open roles in this demo — but we’d love to hear from you.' },
   }[kind];
   return (
     <div className="container-x max-w-2xl py-16 text-center">
-      <h1 className="text-5xl font-black tracking-tight">{content.t}</h1>
+      <h1 className="headline text-6xl">{content.t}</h1>
       <p className="mx-auto mt-4 max-w-lg text-lg text-ink-2">{content.b}</p>
       <Link to="/explore" className="btn btn-primary btn-lg mt-8">Explore events</Link>
     </div>

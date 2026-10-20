@@ -62,7 +62,7 @@ export default function Explore() {
   return (
     <div className="container-x pt-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="text-4xl font-black tracking-tight sm:text-5xl">Discover Events</h1>
+        <h1 className="headline text-5xl sm:text-7xl">Discover <span className="text-brand">events</span></h1>
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" />
           <input

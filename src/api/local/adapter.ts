@@ -42,10 +42,11 @@ const latency = () => sleep(40 + Math.random() * 90);
 // ---------------------------------------------------------------- core access
 
 function tx<T>(fn: (db: DB) => T): T {
-  const db = readDb();
-  housekeeping(db);
-  const out = fn(db);
-  writeDb(db);
+  // work on a copy so a call that fails half-way never leaves partial changes behind
+  const draft = structuredClone(readDb());
+  housekeeping(draft);
+  const out = fn(draft);
+  writeDb(draft);
   return out;
 }
 
@@ -84,6 +85,13 @@ function requireRole(db: DB, orgId: ID, allowed: (TeamRole | 'scanner')[]) {
   return r!;
 }
 const MANAGERS: TeamRole[] = ['owner', 'admin'];
+const ORG_PROFILE_FIELDS = ['name', 'slug', 'bio', 'city', 'instagram', 'website', 'contactEmail', 'avatarUrl', 'bannerSeed'] as const;
+
+/** Uploaded images are stored as data URLs; only accept real image types. */
+function safeImage(url: string) {
+  if (!/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(url)) fail('Upload a PNG, JPG, GIF or WebP image.');
+  if (url.length > 1_400_000) fail('That image is too large — choose one under 1 MB.');
+}
 const DOOR: (TeamRole | 'scanner')[] = ['owner', 'admin', 'doorperson', 'scanner'];
 
 // ---------------------------------------------------------------- inventory
@@ -124,7 +132,7 @@ function processWaitlist(db: DB, ev: BpopEvent, tt: TicketType) {
     free -= q;
     const u = userById(db, w.userId);
     notify(db, w.userId, { kind: 'waitlist', title: 'A ticket opened up for you 🎟️', body: `${q} × ${tt.name} for ${ev.title}. Claim within ${tt.waitlistResponseMins} min.`, link: `/e/${ev.slug}?offer=${w.id}` });
-    if (u) sms(db, u.phone, `Bpop Tags: ${q} ticket(s) for ${ev.title} are yours if you claim within ${tt.waitlistResponseMins} min.`);
+    if (u) sms(db, u.phone, `B-POP TAGS: ${q} ticket(s) for ${ev.title} are yours if you claim within ${tt.waitlistResponseMins} min.`);
   }
   if (free > 0 && !entries.some((w) => w.status === 'waiting')) tt.heldForWaitlist -= free; // nobody left in line
 }
@@ -273,13 +281,16 @@ function trendScore(db: DB, ev: BpopEvent) {
 
 // ---------------------------------------------------------------- pricing
 
-function kickbackCommission(offer: KickbackOffer, items: OrderItem[]): number {
-  const eligible = items.filter((i) => !offer.ticketTypeIds || offer.ticketTypeIds.includes(i.ticketTypeId));
+function kickbackCommission(offer: KickbackOffer, order: Pick<Order, 'items' | 'subtotal' | 'discount' | 'total'>): number {
+  if (order.total <= 0) return 0;
+  // free tickets never earn commission, and promo discounts shrink the base
+  const eligible = order.items.filter((i) => i.unitPrice > 0 && (!offer.ticketTypeIds || offer.ticketTypeIds.includes(i.ticketTypeId)));
   const qty = eligible.reduce((a, i) => a + i.qty, 0);
-  const base = eligible.reduce((a, i) => a + i.unitPrice * i.qty, 0);
   if (!qty) return 0;
-  if (offer.kind === 'percent') return Math.round((base * offer.value) / 100);
-  return offer.per === 'ticket' ? offer.value * qty : offer.value;
+  const gross = eligible.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const base = order.subtotal > 0 ? gross - (order.discount * gross) / order.subtotal : 0;
+  const raw = offer.kind === 'percent' ? Math.round((base * offer.value) / 100) : offer.per === 'ticket' ? offer.value * qty : offer.value;
+  return Math.max(0, Math.min(raw, order.subtotal - order.discount));
 }
 
 function buildQuote(db: DB, ev: BpopEvent, cart: CartLine[], promoCode: string | undefined, user: User | null, waitlistEntryId?: ID, password?: string): CheckoutQuote {
@@ -287,7 +298,10 @@ function buildQuote(db: DB, ev: BpopEvent, cart: CartLine[], promoCode: string |
   if (ev.status === 'draft') return { ...empty, error: 'This is a draft event.' };
   if (ev.status === 'cancelled') return { ...empty, error: 'This event was cancelled.' };
   if (ended(ev)) return { ...empty, error: 'This event has ended.' };
-  const lines = cart.filter((l) => l.qty > 0);
+  if (cart.some((l) => !Number.isInteger(l.qty) || l.qty < 0)) return { ...empty, error: 'Invalid ticket quantity.' };
+  const merged = new Map<ID, number>();
+  for (const l of cart) if (l.qty > 0) merged.set(l.ticketTypeId, (merged.get(l.ticketTypeId) ?? 0) + l.qty);
+  const lines = [...merged].map(([ticketTypeId, qty]) => ({ ticketTypeId, qty }));
   if (!lines.length) return { ...empty, error: 'Select at least one ticket.' };
 
   const entry = waitlistEntryId ? db.waitlist.find((w) => w.id === waitlistEntryId) : undefined;
@@ -327,7 +341,9 @@ function buildQuote(db: DB, ev: BpopEvent, cart: CartLine[], promoCode: string |
   if (promoCode?.trim()) {
     promo = ev.promoCodes.find((p) => p.code.toLowerCase() === promoCode.trim().toLowerCase());
     if (!promo || !promo.active) return { items, subtotal, fees, discount: 0, total: subtotal + fees, error: 'That promo code isn’t valid.' };
-    if (promo.limit !== null && promo.uses >= promo.limit) return { items, subtotal, fees, discount: 0, total: subtotal + fees, error: 'That promo code has reached its limit.' };
+    const code = promo.code;
+    const reserved = db.orders.filter((o) => o.eventId === ev.id && o.promoCode === code && (o.status === 'pending_payment' || o.status === 'pending_approval')).length;
+    if (promo.limit !== null && promo.uses + reserved >= promo.limit) return { items, subtotal, fees, discount: 0, total: subtotal + fees, error: 'That promo code has reached its limit.' };
     const eligible = items.filter((i) => !promo!.ticketTypeIds || promo!.ticketTypeIds.includes(i.ticketTypeId)).reduce((a, i) => a + i.unitPrice * i.qty, 0);
     if (!eligible) return { items, subtotal, fees, discount: 0, total: subtotal + fees, error: 'That promo code doesn’t apply to these tickets.' };
     discount = promo.kind === 'percent' ? Math.round((eligible * promo.value) / 100) : Math.min(promo.value, eligible);
@@ -352,6 +368,8 @@ function issueTickets(db: DB, order: Order, opts: { comp?: boolean; checkedIn?: 
         checkedInBy: opts.checkedIn ? 'Door sale' : undefined,
         isComp: !!opts.comp,
         revokedNonces: [],
+        revokedCodes: [],
+        originOrderId: order.id,
         createdAt: nowIso(),
       };
       db.tickets.push(t);
@@ -374,7 +392,7 @@ function finalizeOrder(db: DB, order: Order) {
     const link = db.kickbackLinks.find((k) => k.code === order.kickbackCode);
     const offer = link && ev.kickbackOffers.find((o) => o.id === link.offerId && o.enabled);
     if (link && offer && link.userId !== order.userId) {
-      order.kickbackCommission = kickbackCommission(offer, order.items);
+      order.kickbackCommission = kickbackCommission(offer, order);
       if (order.kickbackCommission > 0) notify(db, link.userId, { kind: 'kickback', title: `You earned ${tk(order.kickbackCommission)} 💸`, body: `Someone bought tickets to ${ev.title} with your link.`, link: '/kickbacks' });
     }
   }
@@ -383,7 +401,7 @@ function finalizeOrder(db: DB, order: Order) {
   const tickets = issueTickets(db, order);
   const qty = tickets.length;
   notify(db, order.userId, { kind: 'order', title: `You’re going to ${ev.title} 🎉`, body: `${qty} ticket${qty > 1 ? 's' : ''} added to My tickets.`, link: `/orders/${order.id}` });
-  sms(db, order.buyer.phone, `Bpop Tags: you're going to ${ev.title}! Order ${order.number}. Your QR tickets are in the app.`);
+  sms(db, order.buyer.phone, `B-POP TAGS: you're going to ${ev.title}! Order ${order.number}. Your QR tickets are in the app.`);
 }
 
 function nextOrderNumber(db: DB) {
@@ -423,7 +441,25 @@ function ticketView(db: DB, t: Ticket): TicketView | null {
   return { ticket: t, event, org, ticketType, order };
 }
 
-const orderNet = (o: Order) => o.subtotal - o.discount - o.kickbackCommission;
+const orderNet = (o: Order) => o.subtotal - o.discount - o.kickbackCommission - (o.refundedNet ?? 0);
+/** Door sales are collected by the organizer directly, so they never enter the payout balance. */
+const settlesToBalance = (o: Order) => o.source !== 'door';
+
+const isLive = (t: Ticket) => t.status === 'valid' || t.status === 'checked_in';
+/** Tickets the buyer of this order still holds. */
+const heldTickets = (db: DB, o: Order) => db.tickets.filter((t) => t.orderId === o.id && isLive(t));
+/** Tickets sold in this order that now belong to someone else (non-refundable). */
+const transferredAway = (db: DB, o: Order) => db.tickets.filter((t) => t.originOrderId === o.id && t.orderId !== o.id && isLive(t));
+
+/** Refund `count` tickets of an order; `active` is how many of its tickets were still live before. Returns the amount refunded. */
+function refundTickets(o: Order, count: number, active: number): number {
+  const qty = Math.max(1, o.items.reduce((a, i) => a + i.qty, 0));
+  const amount = Math.round((o.total / qty) * count);
+  o.refundedAmount = (o.refundedAmount ?? 0) + amount;
+  o.refundedNet = (o.refundedNet ?? 0) + Math.round(((o.subtotal - o.discount) / qty) * count);
+  o.kickbackCommission = active > 0 ? Math.max(0, Math.round(o.kickbackCommission * (1 - count / active))) : 0;
+  return amount;
+}
 
 function seriesFor(orders: Order[], days = 30) {
   const map = new Map<string, { revenue: number; tickets: number }>();
@@ -510,7 +546,7 @@ export const localAdapter: ApiClient = {
       const p = normalizePhone(phone) ?? fail('Enter a valid Bangladeshi mobile number (e.g. 01711-000000).');
       const code = String(Math.floor(100000 + Math.random() * 900000));
       db.otps[p] = { code, expiresAt: new Date(now() + OTP_MINUTES * 60e3).toISOString() };
-      sms(db, p, `${code} is your Bpop Tags verification code. It expires in ${OTP_MINUTES} minutes.`, { otp: true });
+      sms(db, p, `${code} is your B-POP TAGS verification code. It expires in ${OTP_MINUTES} minutes.`, { otp: true });
       return { sent: true as const };
     });
   },
@@ -569,6 +605,7 @@ export const localAdapter: ApiClient = {
         patch.username = un;
       }
       if (patch.name !== undefined && !patch.name.trim()) fail('Please enter your name.');
+      if (patch.avatarUrl) safeImage(patch.avatarUrl);
       Object.assign(u, patch);
       return u;
     });
@@ -620,11 +657,20 @@ export const localAdapter: ApiClient = {
       const featuredEv = listed.filter((e) => e.featured).sort((a, b) => trendScore(db, b) - trendScore(db, a))[0];
       const org = db.orgs[0]!;
       const spotlightEv = listed.find((e) => e.orgId === org.id);
+      const radar = listed.filter((e) => e.id !== featuredEv?.id).sort((a, b) => trendScore(db, b) - trendScore(db, a)).slice(0, 8);
+      const recap = db.events
+        .filter((e) => e.status === 'published' && e.visibility === 'public' && ended(e))
+        .sort((a, b) => b.endsAt.localeCompare(a.endsAt))
+        .slice(0, 6);
+      const art = listed.filter((e) => e.category === 'Arts & Fashion').slice(0, 3);
       return {
         featured: featuredEv ? toCard(db, featuredEv) : null,
         posters: listed.slice(0, 24),
         spotlight: spotlightEv ? { org, event: spotlightEv } : null,
         orgs: db.orgs,
+        radar: radar.map((e) => toCard(db, e)),
+        recap: recap.map((e) => toCard(db, e)),
+        art: art.map((e) => toCard(db, e)),
       };
     });
   },
@@ -876,9 +922,10 @@ export const localAdapter: ApiClient = {
       const o = db.orders.find((x) => x.id === orderId && x.userId === u.id) ?? fail('Order not found.');
       if (o.status === 'expired') fail('Your 15-minute hold expired and the tickets were released. Please start again.');
       if (o.status !== 'pending_payment') fail('This order has already been processed.');
+      const ev = findEvent(db, o.eventId);
+      if (o.promoCode && !ev.promoCodes.some((p) => p.code === o.promoCode && p.active)) fail('That promo code was turned off. Please start checkout again.');
       o.paymentMethod = method;
       o.paymentRef = ref;
-      const ev = findEvent(db, o.eventId);
       const needsApproval = o.items.some((i) => findTier(ev, i.ticketTypeId).requireApproval);
       if (needsApproval) {
         o.status = 'pending_approval';
@@ -964,7 +1011,7 @@ export const localAdapter: ApiClient = {
       }
       const ev = findEvent(db, db.tickets.find((x) => x.id === ticketIds[0])!.eventId);
       if (recipient) notify(db, recipient.id, { kind: 'transfer', title: `${u.name} sent you ${ticketIds.length} ticket${ticketIds.length > 1 ? 's' : ''}`, body: `${ev.title} — accept to add them to your tickets.`, link: '/tickets?tab=transfers' });
-      sms(db, p, `Bpop Tags: ${u.name} sent you ${ticketIds.length} ticket(s) to ${ev.title}. Log in with this number to accept.`);
+      sms(db, p, `B-POP TAGS: ${u.name} sent you ${ticketIds.length} ticket(s) to ${ev.title}. Log in with this number to accept.`);
     });
   },
   async cancelTransfer(ticketId) {
@@ -1015,8 +1062,11 @@ export const localAdapter: ApiClient = {
         paidAt: nowIso(),
       };
       db.orders.push(order);
+      t.originOrderId ??= t.orderId;
       t.revokedNonces.push(t.qrNonce); // the sender's QR now scans as "Canceled"
+      t.revokedCodes = [...(t.revokedCodes ?? []), t.code]; // ...and so does the printed code
       t.qrNonce = nonce();
+      t.code = shortCode();
       t.ownerId = u.id;
       t.orderId = order.id;
       t.transfer = undefined;
@@ -1041,6 +1091,7 @@ export const localAdapter: ApiClient = {
       if (o.source === 'transfer') fail('Transferred tickets are non-refundable.');
       if (o.status !== 'paid') fail('Only paid orders can be refunded.');
       if (o.total === 0) fail('Free orders don’t need a refund — just cancel your RSVP.');
+      if (!heldTickets(db, o).length) fail('Transferred tickets are non-refundable.');
       o.refundRequested = true;
       const ev = findEvent(db, o.eventId);
       const org = findOrg(db, ev.orgId);
@@ -1054,15 +1105,22 @@ export const localAdapter: ApiClient = {
       const t = db.tickets.find((x) => x.id === ticketId && x.ownerId === u.id) ?? fail('Ticket not found.');
       const ev = findEvent(db, t.eventId);
       const tt = findTier(ev, t.ticketTypeId);
-      if (!tt.waitlistEnabled) fail('This ticket type doesn’t have a waitlist.');
-      if (t.status !== 'valid' || t.transfer) fail('Only unused tickets can be returned.');
       if (t.isComp) fail('Complimentary tickets can’t be returned.');
+      if (t.status !== 'valid' || t.transfer) fail('Only unused tickets can be returned.');
+      if (!tt.waitlistEnabled) fail('This ticket type doesn’t have a waitlist.');
+      const order = db.orders.find((o) => o.id === t.orderId) ?? fail('Order not found.');
+      if (order.source === 'transfer') fail('Transferred tickets are non-refundable, so they can’t be returned.');
+      if (order.source === 'comp') fail('Complimentary tickets can’t be returned.');
       if (!hasWaiting(db, tt.id)) fail('Nobody is on the waitlist right now — try again later.');
       if (ended(ev)) fail('This event has ended.');
+      const active = heldTickets(db, order).length + transferredAway(db, order).length;
       t.status = 'refunded';
       t.returnedToWaitlist = true;
+      t.transfer = undefined;
+      const amount = order.status === 'paid' && order.total > 0 ? refundTickets(order, 1, active) : 0;
+      if (order.status === 'paid' && !heldTickets(db, order).length && !transferredAway(db, order).length) order.status = 'refunded';
       releaseSeats(db, ev, tt, 1);
-      notify(db, u.id, { kind: 'order', title: 'Ticket returned to the waitlist', body: `You’ll be refunded ${tk(tt.price)} for your ${tt.name} ticket.`, link: '/tickets' });
+      notify(db, u.id, { kind: 'order', title: 'Ticket returned to the waitlist', body: amount > 0 ? `${tk(amount)} for your ${tt.name} ticket is on its way back to your ${order.paymentMethod}.` : `Your ${tt.name} ticket was released to the waitlist.`, link: '/tickets' });
     });
   },
   async joinWaitlist(eventId, ticketTypeId, qty) {
@@ -1130,10 +1188,12 @@ export const localAdapter: ApiClient = {
     return tx((db) => {
       const u = me(db);
       const ev = findEvent(db, eventId);
-      const existing = db.kickbackLinks.find((l) => l.eventId === eventId && l.userId === u.id && ev.kickbackOffers.some((o) => o.id === l.offerId && o.enabled));
-      if (existing) return existing;
-      const offer = ev.kickbackOffers.find((o) => o.enabled && o.isPublic) ?? ev.kickbackOffers.find((o) => o.enabled && o.affiliateIds.includes(u.id));
+      const enabled = ev.kickbackOffers.filter((o) => o.enabled);
+      // an invited affiliate earns their private rate; everyone else gets the public offer
+      const offer = enabled.find((o) => !o.isPublic && o.affiliateIds.includes(u.id)) ?? enabled.find((o) => o.isPublic);
       if (!offer) return null;
+      const existing = db.kickbackLinks.find((l) => l.eventId === eventId && l.userId === u.id && l.offerId === offer.id);
+      if (existing) return existing;
       let code = '';
       do code = `${(u.username || 'BPOP').replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase()}${Math.floor(10 + Math.random() * 89)}`;
       while (db.kickbackLinks.some((l) => l.code === code));
@@ -1201,17 +1261,25 @@ export const localAdapter: ApiClient = {
   async updateOrg(orgId, patch) {
     await latency();
     return tx((db) => {
-      requireRole(db, orgId, MANAGERS);
+      const role = requireRole(db, orgId, MANAGERS);
       const org = findOrg(db, orgId);
-      if (patch.slug && patch.slug !== org.slug) {
-        const s = slugify(patch.slug);
-        if (!s || db.orgs.some((o) => o.slug === s && o.id !== orgId)) fail('That URL is taken.');
-        patch.slug = s;
+      const next: Partial<Organization> = {};
+      for (const k of ORG_PROFILE_FIELDS) if (k in patch) (next as Record<string, unknown>)[k] = patch[k];
+      if ('payoutMethods' in patch) {
+        if (role !== 'owner') fail('Only an owner can change payout accounts.');
+        next.payoutMethods = patch.payoutMethods;
       }
-      const { id: _id, team: _team, ...safe } = patch;
-      void _id;
-      void _team;
-      Object.assign(org, safe);
+      if (next.name !== undefined && !next.name.trim()) fail('Give your organization a name.');
+      if (next.website && !/^https?:\/\/\S+$/i.test(next.website)) fail('Website must start with http:// or https://');
+      if (next.instagram !== undefined) next.instagram = next.instagram?.replace(/^@/, '').replace(/[^A-Za-z0-9._]/g, '') || undefined;
+      if (next.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next.contactEmail)) fail('Enter a valid contact email.');
+      if (next.avatarUrl) safeImage(next.avatarUrl);
+      if (next.slug !== undefined && next.slug !== org.slug) {
+        const s = slugify(next.slug ?? '');
+        if (!s || db.orgs.some((o) => o.slug === s && o.id !== orgId)) fail('That URL is taken.');
+        next.slug = s;
+      }
+      Object.assign(org, next);
       return org;
     });
   },
@@ -1234,6 +1302,7 @@ export const localAdapter: ApiClient = {
       const orders = db.orders.filter((o) => ids.has(o.eventId));
       const paid = orders.filter((o) => o.status === 'paid');
       const revenue = paid.reduce((a, o) => a + orderNet(o), 0);
+      const payable = paid.filter(settlesToBalance).reduce((a, o) => a + orderNet(o), 0);
       const paidOut = db.payouts.filter((p) => p.orgId === orgId).reduce((a, p) => a + p.amount + p.fee, 0);
       const tickets = db.tickets.filter((t) => ids.has(t.eventId) && (t.status === 'valid' || t.status === 'checked_in'));
       const pageViews = evs.reduce((a, e) => a + e.pageViews, 0);
@@ -1245,7 +1314,8 @@ export const localAdapter: ApiClient = {
         conversion: pageViews ? paid.filter((o) => o.source === 'online').length / pageViews : 0,
         attendees: new Set(tickets.map((t) => t.ownerId)).size,
         followers: db.users.filter((u) => u.following.includes(orgId)).length,
-        balance: Math.max(0, revenue - paidOut),
+        balance: Math.max(0, payable - paidOut),
+        doorCollected: paid.filter((o) => !settlesToBalance(o)).reduce((a, o) => a + o.total, 0),
         pendingBalance: orders.filter((o) => o.status === 'pending_approval').reduce((a, o) => a + orderNet(o), 0),
         series: seriesFor(paid),
         topEvents: evs
@@ -1262,6 +1332,7 @@ export const localAdapter: ApiClient = {
     await latency();
     return tx((db) => {
       requireRole(db, orgId, MANAGERS);
+      if (input.poster?.imageUrl) safeImage(input.poster.imageUrl);
       const title = input.title?.trim() || 'Untitled event';
       const start = input.startsAt ?? new Date(now() + 7 * 86400e3).toISOString();
       const ev: BpopEvent = {
@@ -1307,8 +1378,10 @@ export const localAdapter: ApiClient = {
     await latency();
     return tx((db) => {
       const ev = findEvent(db, eventId);
+      for (const k of ['id', 'orgId', 'featured', 'sponsored', 'pageViews', 'createdAt', 'seriesId'] as const) delete patch[k];
+      if (patch.poster?.imageUrl) safeImage(patch.poster.imageUrl);
       const keys = Object.keys(patch);
-      const doorOnly = keys.every((k) => k === 'guestList');
+      const doorOnly = keys.length > 0 && keys.every((k) => k === 'guestList');
       requireRole(db, ev.orgId, doorOnly ? DOOR : MANAGERS);
       const wasDraft = ev.status === 'draft';
       if (patch.slug !== undefined) patch.slug = uniqueSlug(db, patch.slug, ev.id);
@@ -1357,9 +1430,15 @@ export const localAdapter: ApiClient = {
         guestList: [],
         createdAt: nowIso(),
       };
-      ev.ticketTypes = ev.ticketTypes.map((t) => ({ ...t, id: uid('tt'), sold: 0, heldForWaitlist: 0, markedSoldOut: false }));
-      ev.promoCodes = ev.promoCodes.map((p) => ({ ...p, id: uid('pc'), uses: 0, ticketTypeIds: null }));
-      ev.kickbackOffers = ev.kickbackOffers.map((o) => ({ ...o, id: uid('kb'), ticketTypeIds: null }));
+      const tierIds = new Map<ID, ID>();
+      ev.ticketTypes = ev.ticketTypes.map((t) => {
+        const id = uid('tt');
+        tierIds.set(t.id, id);
+        return { ...t, id, sold: 0, heldForWaitlist: 0, markedSoldOut: false };
+      });
+      const remap = (ids: ID[] | null) => (ids === null ? null : ids.map((x) => tierIds.get(x)).filter((x): x is ID => !!x));
+      ev.promoCodes = ev.promoCodes.map((p) => ({ ...p, id: uid('pc'), uses: 0, ticketTypeIds: remap(p.ticketTypeIds) }));
+      ev.kickbackOffers = ev.kickbackOffers.map((o) => ({ ...o, id: uid('kb'), ticketTypeIds: remap(o.ticketTypeIds) }));
       ev.trackingLinks = ev.trackingLinks.map((t) => ({ ...t, id: uid('tl'), visits: 0 }));
       db.events.push(ev);
       return ev;
@@ -1373,11 +1452,16 @@ export const localAdapter: ApiClient = {
       ev.status = 'cancelled';
       for (const o of db.orders.filter((x) => x.eventId === ev.id)) {
         if (o.status === 'paid' || o.status === 'pending_approval') {
+          const due = o.total - (o.refundedAmount ?? 0);
           o.status = 'refunded';
-          notify(db, o.userId, { kind: 'order', title: `${ev.title} was cancelled`, body: o.total > 0 ? `Your ${tk(o.total)} will be refunded to your ${o.paymentMethod}.` : 'Your RSVP was cancelled.', link: `/orders/${o.id}` });
+          o.refundedAmount = o.total;
+          notify(db, o.userId, { kind: 'order', title: `${ev.title} was cancelled`, body: due > 0 ? `Your ${tk(due)} will be refunded to your ${o.paymentMethod}.` : 'Your RSVP was cancelled.', link: `/orders/${o.id}` });
         } else if (o.status === 'pending_payment') o.status = 'cancelled';
       }
-      for (const t of db.tickets.filter((x) => x.eventId === ev.id)) if (t.status === 'valid') t.status = 'refunded';
+      for (const t of db.tickets.filter((x) => x.eventId === ev.id)) if (t.status === 'valid') {
+        t.status = 'refunded';
+        t.transfer = undefined;
+      }
       for (const w of db.waitlist.filter((x) => x.eventId === ev.id)) if (w.status === 'waiting' || w.status === 'offered') w.status = 'expired';
     });
   },
@@ -1451,16 +1535,20 @@ export const localAdapter: ApiClient = {
       const ev = findEvent(db, o.eventId);
       requireRole(db, ev.orgId, MANAGERS);
       if (o.status !== 'paid') fail('Only paid orders can be refunded.');
-      o.status = 'refunded';
+      const held = heldTickets(db, o);
+      const away = transferredAway(db, o);
+      if (!held.length) fail(away.length ? 'Every ticket in this order was transferred — transferred tickets are non-refundable.' : 'This order has no tickets left to refund.');
+      const amount = refundTickets(o, held.length, held.length + away.length);
       o.refundRequested = false;
-      const tix = db.tickets.filter((t) => t.orderId === o.id && (t.status === 'valid' || t.status === 'checked_in'));
-      for (const t of tix) {
+      if (!away.length) o.status = 'refunded';
+      for (const t of held) {
         const wasValid = t.status === 'valid';
         t.status = 'refunded';
         t.transfer = undefined;
         if (wasValid) releaseSeats(db, ev, findTier(ev, t.ticketTypeId), 1);
       }
-      notify(db, o.userId, { kind: 'order', title: 'Refund issued', body: o.total > 0 ? `${tk(o.total)} for ${ev.title} is on its way back to your ${o.paymentMethod}.` : `Your RSVP to ${ev.title} was cancelled.`, link: `/orders/${o.id}` });
+      const note = away.length ? ` ${away.length} transferred ticket${away.length > 1 ? 's were' : ' was'} not refunded.` : '';
+      notify(db, o.userId, { kind: 'order', title: 'Refund issued', body: amount > 0 ? `${tk(amount)} for ${ev.title} is on its way back to your ${o.paymentMethod}.${note}` : `Your RSVP to ${ev.title} was cancelled.`, link: `/orders/${o.id}` });
     });
   },
   async sendComps(eventId, input) {
@@ -1469,7 +1557,7 @@ export const localAdapter: ApiClient = {
       const ev = findEvent(db, eventId);
       requireRole(db, ev.orgId, MANAGERS);
       const tt = findTier(ev, input.ticketTypeId);
-      if (input.qty < 1 || input.qty > 50) fail('Send between 1 and 50 complimentary tickets.');
+      if (!Number.isInteger(input.qty) || input.qty < 1 || input.qty > 50) fail('Send between 1 and 50 complimentary tickets.');
       const user = ensureUserForPhone(db, input.phone, input.name);
       tt.sold += input.qty;
       const order: Order = {
@@ -1493,7 +1581,7 @@ export const localAdapter: ApiClient = {
       db.orders.push(order);
       const tickets = issueTickets(db, order, { comp: true });
       notify(db, user.id, { kind: 'order', title: `You’ve been comped to ${ev.title} 🎁`, body: `${input.qty} × ${tt.name} — no action needed.`, link: '/tickets' });
-      sms(db, user.phone, `Bpop Tags: you've received ${input.qty} complimentary ticket(s) to ${ev.title}. They're in your account.`);
+      sms(db, user.phone, `B-POP TAGS: you've received ${input.qty} complimentary ticket(s) to ${ev.title}. They're in your account.`);
       return tickets;
     });
   },
@@ -1517,7 +1605,7 @@ export const localAdapter: ApiClient = {
       requireRole(db, ev.orgId, DOOR);
       const tt = findTier(ev, input.ticketTypeId);
       if (ev.status !== 'published') fail('Publish the event before selling at the door.');
-      if (input.qty < 1) fail('Choose a quantity.');
+      if (!Number.isInteger(input.qty) || input.qty < 1) fail('Choose a quantity.');
       if (remaining(tt) < input.qty) fail(remaining(tt) <= 0 ? `${tt.name} is sold out.` : `Only ${remaining(tt)} left.`);
       if (!input.name.trim()) fail('Enter the guest’s name.');
       const user = input.phone ? ensureUserForPhone(db, input.phone, input.name) : ensureUserForPhone(db, `017${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`, input.name);
@@ -1560,6 +1648,10 @@ export const localAdapter: ApiClient = {
       } else {
         const codeIn = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
         ticket = db.tickets.find((t) => t.code.replace('-', '') === codeIn);
+        if (!ticket) {
+          const old = db.tickets.find((t) => t.revokedCodes?.some((c) => c.replace('-', '') === codeIn));
+          if (old) return old.eventId === eventId ? { status: 'cancelled', ticket: old } : { status: 'wrong_event' };
+        }
       }
       if (!ticket) return { status: 'invalid' };
       if (ticket.eventId !== eventId) return { status: 'wrong_event' };
@@ -1661,11 +1753,14 @@ export const localAdapter: ApiClient = {
       const u = ensureUserForPhone(db, phone);
       if (!offer.affiliateIds.includes(u.id)) offer.affiliateIds.push(u.id);
       notify(db, u.id, { kind: 'kickback', title: 'You’re invited to earn Kickbacks', body: `Share ${ev.title} and earn ${offer.kind === 'percent' ? `${offer.value}%` : tk(offer.value)} per ${offer.per}.`, link: `/e/${ev.slug}` });
-      sms(db, u.phone, `Bpop Tags: you've been invited to promote ${ev.title} and earn Kickbacks.`);
+      sms(db, u.phone, `B-POP TAGS: you've been invited to promote ${ev.title} and earn Kickbacks.`);
     });
   },
   async smsAudienceSize(orgId, audience, eventId) {
-    return view((db) => audienceFor(db, orgId, audience, eventId).length);
+    return view((db) => {
+      requireRole(db, orgId, MANAGERS);
+      return audienceFor(db, orgId, audience, eventId).length;
+    });
   },
   async sendSmsBlast(orgId, input) {
     await latency();
@@ -1706,7 +1801,7 @@ export const localAdapter: ApiClient = {
       const org = findOrg(db, orgId);
       const method = org.payoutMethods.find((m) => m.primary) ?? org.payoutMethods[0] ?? fail('Add a bKash, Nagad or bank account first.');
       const evIds = new Set(db.events.filter((e) => e.orgId === orgId).map((e) => e.id));
-      const revenue = db.orders.filter((o) => evIds.has(o.eventId) && o.status === 'paid').reduce((a, o) => a + orderNet(o), 0);
+      const revenue = db.orders.filter((o) => evIds.has(o.eventId) && o.status === 'paid' && settlesToBalance(o)).reduce((a, o) => a + orderNet(o), 0);
       const paidOut = db.payouts.filter((p) => p.orgId === orgId).reduce((a, p) => a + p.amount + p.fee, 0);
       const balance = revenue - paidOut;
       const fee = instant ? Math.max(10, Math.round(amount * 0.015)) : 0;
@@ -1720,10 +1815,12 @@ export const localAdapter: ApiClient = {
   async addTeamMember(orgId, phone, role) {
     await latency();
     tx((db) => {
-      requireRole(db, orgId, MANAGERS);
+      const actor = requireRole(db, orgId, MANAGERS);
       const org = findOrg(db, orgId);
       const u = ensureUserForPhone(db, phone);
       const existing = org.team.find((t) => t.userId === u.id);
+      if ((role === 'owner' || existing?.role === 'owner') && actor !== 'owner') fail('Only an owner can add or change owners.');
+      if (existing?.role === 'owner' && role !== 'owner' && org.team.filter((t) => t.role === 'owner').length === 1) fail('An organization needs at least one owner.');
       if (existing) existing.role = role;
       else org.team.push({ userId: u.id, role, addedAt: nowIso() });
       if (role === 'host') {
@@ -1737,10 +1834,11 @@ export const localAdapter: ApiClient = {
   async removeTeamMember(orgId, userId) {
     await latency();
     tx((db) => {
-      requireRole(db, orgId, MANAGERS);
+      const actor = requireRole(db, orgId, MANAGERS);
       const org = findOrg(db, orgId);
       const target = org.team.find((t) => t.userId === userId);
       if (!target) return;
+      if (target.role === 'owner' && actor !== 'owner') fail('Only an owner can remove an owner.');
       if (target.role === 'owner' && org.team.filter((t) => t.role === 'owner').length === 1) fail('An organization needs at least one owner.');
       org.team = org.team.filter((t) => t.userId !== userId);
     });
@@ -1795,7 +1893,10 @@ export const localAdapter: ApiClient = {
   },
   async askAi(orgId, question) {
     await sleep(500);
-    return view((db) => answer(db, orgId, question));
+    return view((db) => {
+      requireRole(db, orgId, ['owner', 'admin', 'host']);
+      return answer(db, orgId, question);
+    });
   },
 
   async resetDemo() {
@@ -1812,7 +1913,7 @@ function audienceFor(db: DB, orgId: ID, audience: 'all_attendees' | 'event_atten
   return db.users.filter((u) => ids.has(u.id) && u.smsOptIn && u.phone);
 }
 
-/** "Ask Bpop AI" — answers from the organization's own data, no external API. */
+/** "Ask B-POP AI" — answers from the organization's own data, no external API. */
 function answer(db: DB, orgId: ID, question: string): string {
   const q = question.toLowerCase();
   const evs = db.events.filter((e) => e.orgId === orgId);

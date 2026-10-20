@@ -109,7 +109,7 @@ export interface LineupItem {
 
 export interface Poster {
   seed: number;
-  style: 'gradient' | 'grid' | 'sun' | 'wave' | 'type';
+  style: 'gradient' | 'grid' | 'sun' | 'wave' | 'type' | 'zine';
   hues: [number, number];
   imageUrl?: string; // data URL when the organizer uploads an image
 }
@@ -264,6 +264,8 @@ export interface Order {
   source: 'online' | 'door' | 'comp' | 'waitlist' | 'transfer';
   holdExpiresAt?: ISO;
   refundRequested?: boolean;
+  refundedAmount?: number; // money returned to the buyer so far (partial refunds)
+  refundedNet?: number; // organizer earnings reversed by those refunds
   createdAt: ISO;
   paidAt?: ISO;
 }
@@ -291,6 +293,8 @@ export interface Ticket {
   transfer?: TicketTransfer; // pending transfer
   returnedToWaitlist?: boolean;
   revokedNonces: string[]; // QR codes that were valid before a transfer
+  revokedCodes?: string[]; // printed codes that were valid before a transfer
+  originOrderId?: ID; // the order that sold this ticket (survives transfers)
   createdAt: ISO;
 }
 
@@ -407,6 +411,7 @@ export interface OrgStats {
   followers: number;
   balance: number;
   pendingBalance: number;
+  doorCollected: number; // door sales the organizer already holds (not paid out)
   series: { date: string; revenue: number; tickets: number }[];
   topEvents: { event: BpopEvent; revenue: number; tickets: number }[];
 }
@@ -453,7 +458,18 @@ export interface ApiClient {
 
   // discovery
   explore(filters: ExploreFilters): Promise<{ featured: EventCard[]; trending: EventCard[] }>;
-  homeFeed(): Promise<{ featured: EventCard | null; posters: BpopEvent[]; spotlight: { org: Organization; event: BpopEvent } | null; orgs: Organization[] }>;
+  homeFeed(): Promise<{
+    featured: EventCard | null;
+    posters: BpopEvent[];
+    spotlight: { org: Organization; event: BpopEvent } | null;
+    orgs: Organization[];
+    /** "Off the grid · On our radar": trending upcoming events */
+    radar: EventCard[];
+    /** "Here's what you missed last week": recently ended public events */
+    recap: EventCard[];
+    /** "We found art": upcoming Arts & Fashion events */
+    art: EventCard[];
+  }>;
   getEventBySlug(slug: string): Promise<{ card: EventCard; series: BpopEvent[]; friendsGoing: User[]; guests: User[] } | null>;
   getSeries(seriesId: ID): Promise<EventCard[]>;
   getOrg(slug: string): Promise<{ org: Organization; upcoming: EventCard[]; past: EventCard[]; stats: { events: number; attendees: number; followers: number } } | null>;

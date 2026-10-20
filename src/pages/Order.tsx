@@ -57,6 +57,7 @@ export default function OrderPage() {
           {order.fees > 0 && <div className="flex justify-between text-ink-3"><span>Service fees</span><span>{tk(order.fees)}</span></div>}
           {order.discount > 0 && <div className="flex justify-between text-ok"><span>Promo {order.promoCode}</span><span>−{tk(order.discount)}</span></div>}
           <div className="flex justify-between border-t border-line pt-2 font-bold"><span>Total</span><span>{tk(order.total)}</span></div>
+          {(order.refundedAmount ?? 0) > 0 && <div className="flex justify-between text-ink-3" data-testid="order-refunded"><span>Refunded</span><span>−{tk(order.refundedAmount!)}</span></div>}
           {order.paymentMethod && <p className="pt-1 text-xs text-ink-3">Paid with {order.paymentMethod === 'bkash' ? 'bKash' : order.paymentMethod === 'nagad' ? 'Nagad' : order.paymentMethod}{order.paymentRef ? ` · Ref ${order.paymentRef}` : ''}</p>}
         </div>
       </div>

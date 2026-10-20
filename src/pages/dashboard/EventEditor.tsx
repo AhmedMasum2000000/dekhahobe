@@ -19,7 +19,7 @@ const CITY_COORDS: Record<City, [number, number]> = {
   Rajshahi: [24.3745, 88.6042],
   Khulna: [22.8456, 89.5403],
 };
-const STYLES: Poster['style'][] = ['gradient', 'sun', 'grid', 'wave', 'type'];
+const STYLES: Poster['style'][] = ['zine', 'gradient', 'sun', 'grid', 'wave', 'type'];
 
 // <input type="datetime-local"> values are Bangladesh time (UTC+6)
 export const toDhakaInput = (iso: string) => new Date(new Date(iso).getTime() + 6 * 3600e3).toISOString().slice(0, 16);

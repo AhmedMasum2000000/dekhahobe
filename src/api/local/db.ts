@@ -34,7 +34,7 @@ export interface DB {
   otps: Record<string, { code: string; expiresAt: string }>;
 }
 
-export const DB_VERSION = 4;
+export const DB_VERSION = 5;
 const DB_KEY = 'bpop:db';
 const SESSION_KEY = 'bpop:session';
 

@@ -1,7 +1,8 @@
 import { memo, useId } from 'react';
 import type { Poster } from '@/api';
 
-// Original generative flyer art — five styles, deterministic from a seed.
+// Original generative flyer art — six styles, deterministic from a seed.
+// 'zine' is the B-POP TAGS collage look: black, hot pink halftone, red tape, Y2K star.
 function rng(seed: number) {
   let a = seed >>> 0;
   return () => {
@@ -50,7 +51,7 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
   const c2 = `hsl(${h2} 90% 55%)`;
   const dark = `hsl(${h1} 60% 12%)`;
   const light = `hsl(${h2} 100% 92%)`;
-  const lines = wrap(title, poster.style === 'type' ? 9 : 12, poster.style === 'type' ? 5 : 4);
+  const lines = wrap(title, poster.style === 'type' ? 10 : 13, poster.style === 'type' ? 5 : 4);
   const fs = lines.length > 3 ? 40 : lines.length > 2 ? 46 : 54;
   const g = `g${uidRaw}`;
   const n = `n${uidRaw}`;
@@ -93,6 +94,20 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
             })}
           </>
         );
+      case 'zine':
+        return (
+          <>
+            <rect width="400" height="500" fill="#0A0A0A" />
+            <circle cx={250 + r() * 90} cy={150 + r() * 60} r="190" fill={`url(#d${uidRaw})`} mask={`url(#m${uidRaw})`} />
+            <rect x="-40" y={250 + r() * 50} width="520" height="46" fill="#E3001B" transform={`rotate(${-8 + r() * 5} 200 280)`} opacity=".92" />
+            <rect x="-40" y={120 + r() * 40} width="300" height="18" fill={c1} transform={`rotate(${6 + r() * 4} 120 130)`} opacity=".85" />
+            <g transform="translate(22 18) scale(1.05)">
+              <path d="M19.5 4.9 L34.4 23.3 L54.6 18.1 L43.6 34.8 L58.5 53.3 L36.8 45.2 L25.8 61.8 L23.3 40.1 L1.7 31.9 L21.9 26.6Z" fill="none" stroke="#FA02A3" strokeWidth="4" strokeLinejoin="round" />
+              <path d="M25.6 22.4 L32.1 30.2 L40.8 28.1 L36.3 35.4 L42.5 43.4 L33.2 40.0 L28.3 47.1 L27.1 37.8 L17.9 34.1 L26.4 31.7Z" fill="#FA02A3" />
+            </g>
+            <text x="92" y="52" fontSize="22" fontStyle="italic" fontWeight="900" fill="#FED7EF" stroke="#FA02A3" strokeWidth="1.5" paintOrder="stroke" fontFamily="Inter Tight, Inter, sans-serif" letterSpacing="1">B-POP</text>
+          </>
+        );
       case 'type':
         return (
           <>
@@ -128,6 +143,17 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
         <filter id={`b${uidRaw}`}>
           <feGaussianBlur stdDeviation="30" />
         </filter>
+        <pattern id={`d${uidRaw}`} width="11" height="11" patternUnits="userSpaceOnUse">
+          <circle cx="5.5" cy="5.5" r="3.4" fill="#FA02A3" />
+        </pattern>
+        <radialGradient id={`r${uidRaw}`}>
+          <stop offset="0" stopColor="#fff" />
+          <stop offset=".75" stopColor="#fff" stopOpacity=".35" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </radialGradient>
+        <mask id={`m${uidRaw}`}>
+          <rect width="400" height="500" fill={`url(#r${uidRaw})`} />
+        </mask>
         <filter id={n}>
           <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch" />
           <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .18 0" />
@@ -137,14 +163,14 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
       {art}
       <rect width="400" height="500" filter={`url(#${n})`} />
       {showText && (
-        <g fontFamily="Inter Tight, Inter, sans-serif" fill={textColor}>
+        <g fontFamily="Anton, 'Inter Tight', Impact, sans-serif" fill={textColor}>
           {kicker && (
-            <text x="28" y="44" fontSize="15" fontWeight="700" letterSpacing="3" opacity=".9">
+            <text x="28" y="44" fontSize="15" fontFamily="Inter, sans-serif" fontWeight="700" letterSpacing="3" opacity=".9">
               {kicker.toUpperCase()}
             </text>
           )}
           {lines.map((l, i) => (
-            <text key={i} x="26" y={472 - (lines.length - 1 - i) * (fs * 0.95)} fontSize={fs} fontWeight="900" letterSpacing="-1">
+            <text key={i} x="26" y={472 - (lines.length - 1 - i) * (fs * 1.02)} fontSize={fs} letterSpacing=".5" fill={poster.style === 'zine' && i === lines.length - 1 ? '#FA02A3' : undefined}>
               {l}
             </text>
           ))}

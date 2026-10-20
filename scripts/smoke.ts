@@ -156,5 +156,66 @@ const refundTarget = readDb().orders.find((o) => o.eventId === neon.id && o.stat
 await api.refundOrder(refundTarget.id);
 ok(readDb().orders.find((o) => o.id === refundTarget.id)!.status === 'refunded', 'refund order');
 await expectErr(api.updateEvent(neon.id, { kickbackOffers: [...neon.kickbackOffers, { ...neon.kickbackOffers[0]!, id: 'x2' }] }), /one public/, 'one public kickback offer');
+
+// --- regression checks for the pre-ship review fixes ---
+const dsc = orgs[0]!.org;
+// 1 + 2: refunding an order after one ticket was transferred only refunds what the buyer still holds;
+// the transferred ticket got a fresh code, so the old printed code now scans as cancelled
+const before1 = readDb().orders.find((o) => o.id === order.id)!;
+await api.refundOrder(order.id);
+const after1 = readDb().orders.find((o) => o.id === order.id)!;
+ok(after1.status === 'paid' && after1.refundedAmount! > 0 && after1.refundedAmount! < before1.total, `partial refund after transfer (${after1.refundedAmount} of ${before1.total})`);
+ok(['valid', 'checked_in'].includes(readDb().tickets.find((t) => t.id === tix[0]!.id)!.status), 'transferred ticket survives the refund');
+ok(readDb().tickets.find((t) => t.id === tix[0]!.id)!.code !== tix[0]!.code, 'transfer rotates the ticket code');
+ok((await api.scanTicket(neon.id, tix[0]!.code, 'door')).status === 'cancelled', 'old manual code after transfer → cancelled');
+// 9: cash at the door is tracked but never paid out again
+const stB = await api.orgStats(dsc.id);
+await api.doorSale(neon.id, { ticketTypeId: ga.id, qty: 1, method: 'cash', name: 'Walk In' });
+const stA = await api.orgStats(dsc.id);
+ok(stA.balance === stB.balance && stA.doorCollected === stB.doorCollected + ga.price, 'door sales excluded from payout balance');
+await expectErr(api.doorSale(neon.id, { ticketTypeId: ga.id, qty: 1.5, method: 'cash', name: 'Walk In' }), /quantity/, 'fractional door sale rejected');
+// 10: duplicating keeps tier-restricted promos/offers pointed at the copied tiers
+const neonNow = readDb().events.find((e) => e.id === neon.id)!;
+const vip = { id: 'pc-reg', code: 'VIPONLY', kind: 'percent' as const, value: 5, limit: 1, uses: 0, ticketTypeIds: [ga.id], active: true, createdAt: new Date().toISOString() };
+const priv = { id: 'ko-reg', kind: 'percent' as const, value: 20, per: 'order' as const, ticketTypeIds: null, isPublic: false, showBanner: false, enabled: true, affiliateIds: [nus.id], createdAt: new Date().toISOString() };
+await api.updateEvent(neon.id, { promoCodes: [...neonNow.promoCodes, vip], kickbackOffers: [...neonNow.kickbackOffers, priv] });
+const dup = await api.duplicateEvent(neon.id);
+const dupVip = dup.promoCodes.find((p) => p.code === 'VIPONLY')!;
+ok(dupVip.ticketTypeIds?.length === 1 && dupVip.ticketTypeIds[0] === dup.ticketTypes[1]!.id, 'duplicate remaps promo tier restrictions');
+// 5 + 8: admins can't mint owners or touch payouts; a failed multi-step write leaves nothing behind
+await api.addTeamMember(dsc.id, '01700000077', 'admin');
+await api.logout();
+await login('01700000077');
+await expectErr(api.addTeamMember(dsc.id, '01700000078', 'owner'), /owner/, 'admin cannot add an owner');
+await expectErr(api.updateOrg(dsc.id, { payoutMethods: [] }), /owner/, 'admin cannot change payout accounts');
+await expectErr(api.updateOrg(dsc.id, { website: 'javascript:alert(1)' }), /http/, 'unsafe org website rejected');
+await api.logout();
+await login(DEMO_ATTENDEE_PHONE);
+// 7: attendees can't read an org's audience or its AI insights
+await expectErr(api.askAi(dsc.id, 'revenue?'), /permission/, 'ask ai needs an org role');
+await expectErr(api.smsAudienceSize(dsc.id, 'followers'), /permission/, 'sms audience needs an org role');
+const spare = readDb().tickets.find((t) => t.ownerId === nus.id && t.status === 'valid' && !t.transfer && !t.isComp && t.eventId === neon.id);
+if (spare) {
+  await expectErr(api.startTransfer([spare.id, 'no-such-ticket'], '01911222333'), /not found/, 'bad transfer batch rejected');
+  ok(!readDb().tickets.find((t) => t.id === spare.id)!.transfer, 'failed write is rolled back (transactional tx)');
+}
+// 3: cart lines must be whole numbers; duplicates are merged before limits apply
+ok(/quantity/.test((await api.quote(neon.id, [{ ticketTypeId: ga.id, qty: 1.5 }])).error ?? ''), 'fractional quantity rejected');
+const mq = await api.quote(neon.id, [{ ticketTypeId: ga.id, qty: 1 }, { ticketTypeId: ga.id, qty: 1 }]);
+ok(mq.items.length === 1 && mq.items[0]!.qty === 2, 'duplicate cart lines merged');
+// 6: commission is earned on what was actually paid for the tickets, after the promo
+const offer = neonNow.kickbackOffers.find((o) => o.id === kb.offerId)!;
+const base = paid.subtotal - paid.discount;
+ok(paid.kickbackCommission === (offer.kind === 'percent' ? Math.round((base * offer.value) / 100) : Math.min(offer.value, base)), 'kickback uses the discounted base');
+// 12: an invited affiliate gets their private rate, not the public one
+ok((await api.getOrCreateKickbackLink(neon.id))!.offerId === 'ko-reg', 'private affiliate gets private offer');
+// 11: a limited promo counts checkouts still in progress
+await api.startCheckout({ eventId: neon.id, cart: [{ ticketTypeId: ga.id, qty: 1 }], promo: 'VIPONLY', buyer: { name: 'Nusrat Jahan', phone: '01811000002' } });
+ok(/limit/.test((await api.quote(neon.id, [{ ticketTypeId: ga.id, qty: 1 }], 'VIPONLY')).error ?? ''), 'promo limit counts pending checkouts');
+// 4: comps can't be swapped back into the waitlist for a refund
+await api.logout();
+await login('01612345678');
+await expectErr(api.returnToWaitlist(comps[0]!.id), /Complimentary/, 'comp ticket cannot be returned');
+
 console.log(`\n${pass} checks passed`);
 process.exit(0);

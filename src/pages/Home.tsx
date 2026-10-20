@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Megaphone, Rocket, Sparkles, Star, Users, Wallet } from 'lucide-react';
+import { ArrowRight, Instagram, Megaphone, Rocket, Sparkles, Star, Users, Wallet } from 'lucide-react';
 import { api, type BpopEvent } from '@/api';
 import { useApi } from '@/hooks/useApi';
 import { PosterArt } from '@/components/PosterArt';
-import { Avatar, AvatarStack, Verified } from '@/components/ui';
-import { cardRange, tk } from '@/lib/util';
+import { EventCard } from '@/components/EventCard';
+import { Avatar, AvatarStack, PopStar, Sparkle, Verified } from '@/components/ui';
+import { cardRange, dayLabel, tk } from '@/lib/util';
+
+export const INSTAGRAM_URL = 'https://www.instagram.com/bpop.tags/';
 
 function PosterRow({ events, reverse }: { events: BpopEvent[]; reverse?: boolean }) {
   const list = [...events, ...events];
@@ -45,6 +48,27 @@ function PhoneMock({ children, tilt = 0 }: { children: React.ReactNode; tilt?: n
   );
 }
 
+/** Small stamp used on B-POP posts: "OFF THE GRID / ON OUR RADAR". */
+function RadarStamp({ className = 'text-ink' }: { className?: string }) {
+  return (
+    <span className={`stamp ${className}`}>
+      Off the grid <Sparkle className="h-2.5 w-2.5" /> On our radar
+    </span>
+  );
+}
+
+function SectionHead({ children, sub, action }: { children: React.ReactNode; sub?: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div className="min-w-0">
+        {sub}
+        <h2 className="headline mt-3 max-w-3xl text-[40px] sm:text-6xl">{children}</h2>
+      </div>
+      {action}
+    </div>
+  );
+}
+
 export default function Home() {
   const { data } = useApi(() => api.homeFeed(), []);
   const posters = data?.posters ?? [];
@@ -55,14 +79,19 @@ export default function Home() {
   return (
     <div>
       {/* hero */}
-      <section className="overflow-hidden pb-10 pt-10 sm:pt-16">
-        <div className="container-x mb-10 text-center">
-          <h1 className="mx-auto max-w-3xl text-[44px] font-black leading-[0.95] tracking-tighter sm:text-7xl">Find your scene.</h1>
+      <section className="relative overflow-hidden pb-10 pt-10 sm:pt-14">
+        <div className="halftone halftone-fade pointer-events-none absolute -left-24 -top-24 h-80 w-80 text-brand/40" aria-hidden />
+        <div className="halftone halftone-fade pointer-events-none absolute -right-20 top-24 h-72 w-72 text-brand/30" aria-hidden />
+        <div className="container-x relative mb-10 text-center">
+          <div className="flex justify-center"><RadarStamp className="text-brand-dark" /></div>
+          <h1 className="headline mx-auto mt-5 max-w-4xl text-[58px] sm:text-[112px]" data-testid="hero-title">
+            You are on <span className="relative inline-block text-brand">our radar<Sparkle className="absolute -right-6 -top-2 h-6 w-6 animate-twinkle text-brand sm:-right-9 sm:h-9 sm:w-9" /></span>
+          </h1>
           <p className="mx-auto mt-5 max-w-xl text-[17px] text-ink-2">
-            Bpop Tags is the social home for real-life experiences in Bangladesh. Rooftop raves to run clubs, food fests to comedy nights — if it’s happening, it’s on Bpop.
+            Bangla Pop Tags is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
           </p>
-          <div className="mt-7 flex justify-center gap-2">
-            <Link to="/explore" className="btn btn-primary btn-lg">Explore events</Link>
+          <div className="mt-7 flex flex-wrap justify-center gap-2">
+            <Link to="/explore" className="btn btn-brand btn-lg">Explore events</Link>
             <Link to="/create" className="btn btn-outline btn-lg">Host an event</Link>
           </div>
         </div>
@@ -83,7 +112,7 @@ export default function Home() {
               <PosterArt poster={f.event.poster} title={f.event.title} showText={false} />
             </Link>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest text-brand">Happening soon</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-dark">Happening soon</p>
               <h2 className="mt-1 line-clamp-2 text-2xl font-extrabold">{f.event.title}</h2>
               <p className="mt-1 text-sm text-ink-3">{cardRange(f.event.startsAt, f.event.endsAt)} · {f.event.venue.name}</p>
               <p className="mt-2 flex items-center gap-2 text-sm text-ink-2">
@@ -94,6 +123,67 @@ export default function Home() {
             <div className="flex gap-2">
               <Link to={`/e/${f.event.slug}`} className="btn btn-primary btn-md">View event</Link>
               <Link to="/explore" className="btn btn-outline btn-md">View all</Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* off the grid · on our radar */}
+      {data && data.radar.length > 0 && (
+        <section className="container-x mt-20" data-testid="radar">
+          <SectionHead
+            sub={<RadarStamp />}
+            action={<Link to="/explore" className="btn btn-outline btn-md shrink-0">View all <ArrowRight className="h-4 w-4" /></Link>}
+          >
+            Upcoming sub-culture events media <span className="text-pop-red">won’t</span> tell you about
+          </SectionHead>
+          <div className="no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+            {data.radar.map((c) => (
+              <div key={c.event.id} className="w-[220px] shrink-0 snap-start sm:w-[250px]"><EventCard card={c} /></div>
+            ))}
+          </div>
+          <p className="mt-3 flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-4 sm:hidden">Swipe to see <ArrowRight className="h-3 w-3" /></p>
+        </section>
+      )}
+
+      {/* here's what you missed last week */}
+      {data && data.recap.length > 0 && (
+        <section className="relative mt-24 overflow-hidden border-y border-line bg-brand-light py-16" data-testid="recap">
+          <div className="halftone pointer-events-none absolute inset-y-0 right-0 w-1/2 text-brand/15 [mask-image:linear-gradient(90deg,transparent,#000)]" aria-hidden />
+          <div className="container-x relative">
+            <SectionHead sub={<span className="tag-pop">Recap</span>}>
+              Here’s what you <span className="text-brand">missed</span> last week
+            </SectionHead>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+              {data.recap.map((c) => (
+                <Link key={c.event.id} to={`/e/${c.event.slug}`} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-ink">
+                  <PosterArt poster={c.event.poster} title={c.event.title} className="transition duration-500 group-hover:scale-[1.03]" />
+                  <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+                    <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold">{dayLabel(c.event.startsAt)}</span>
+                    {c.goingCount > 0 && <span className="rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold text-white">{c.goingCount.toLocaleString()} went</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* we found art */}
+      {data && data.art.length > 0 && (
+        <section className="container-x mt-24" data-testid="found-art">
+          <div className="grid items-start gap-8 lg:grid-cols-[1fr_2fr]">
+            <div className="relative">
+              <h2 className="headline text-[84px] leading-[0.85] sm:text-[120px]">
+                <PopStar className="mr-1 inline-block h-[0.6em] w-[0.6em] -translate-y-[0.3em] -rotate-12" />We found <span className="outline-pop">art</span>
+              </h2>
+              <p className="mt-5 max-w-sm text-ink-2">Exhibitions, design markets, zines and the artists shaping Bangladesh’s visual culture — spotted by the B-POP team.</p>
+              <Link to={`/explore?category=${encodeURIComponent('Arts & Fashion')}`} className="btn btn-primary btn-lg mt-6">Explore arts &amp; fashion</Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {data.art.map((c, i) => (
+                <div key={c.event.id} className={i === 2 ? 'hidden sm:block' : ''}><EventCard card={c} /></div>
+              ))}
             </div>
           </div>
         </section>
@@ -127,7 +217,7 @@ export default function Home() {
             </div>
           </div>
           <div>
-            <h2 className="text-4xl font-black tracking-tight sm:text-5xl">Plans, sorted.</h2>
+            <h2 className="headline text-5xl sm:text-6xl">Plans, sorted.</h2>
             <div className="mt-8 space-y-6">
               {[
                 ['Find social plans in seconds', 'A feed tuned to your city, your friends and what you love.'],
@@ -135,7 +225,7 @@ export default function Home() {
                 ['Put the phone down and go out', 'Tickets live in the app — tap, scan, you’re in.'],
               ].map(([t, b], i) => (
                 <div key={t} className="flex gap-4">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mist font-display font-extrabold">{i + 1}</span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-soft font-display font-extrabold text-brand-dark">{i + 1}</span>
                   <div><p className="text-lg font-bold">{t}</p><p className="text-ink-3">{b}</p></div>
                 </div>
               ))}
@@ -146,22 +236,22 @@ export default function Home() {
 
       {/* testimonial */}
       <section className="container-x mt-24 text-center">
-        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">“Whenever I’m bored on a Thursday I open Bpop, find something new and send it straight to the group chat.”</p>
+        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">“Whenever I’m bored on a Thursday I open B-POP, find something new and send it straight to the group chat.”</p>
         <div className="mt-6 flex items-center justify-center gap-2">
           <span className="font-display text-xl font-extrabold">4.9</span>
-          <span className="flex">{Array.from({ length: 5 }, (_, i) => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}</span>
+          <span className="flex">{Array.from({ length: 5 }, (_, i) => <Star key={i} className="h-5 w-5 fill-brand text-brand" />)}</span>
         </div>
         <div className="mt-6 flex justify-center"><StoreButtons /></div>
       </section>
 
       {/* culture & community */}
       {data?.spotlight && (
-        <section className="mt-24 bg-mist py-16">
+        <section className="relative mt-24 overflow-hidden bg-mist py-16">
           <div className="container-x grid items-center gap-10 lg:grid-cols-2">
             <div>
-              <h2 className="text-4xl font-black tracking-tight sm:text-5xl">Driving culture & community</h2>
+              <h2 className="headline text-5xl sm:text-6xl">Driving culture &amp; community</h2>
               <p className="mt-4 max-w-md text-ink-2">We partner with the collectives, venues and brands that keep Bangladesh’s culture alive.</p>
-              <Link to="/platform" className="btn btn-primary btn-lg mt-6">Bpop for Organizers <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/platform" className="btn btn-primary btn-lg mt-6">B-POP for Organizers <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <Link to={`/g/${data.spotlight.org.slug}`} className="card flex items-center gap-4 p-4">
               <div className="aspect-[4/5] w-28 shrink-0 overflow-hidden rounded-2xl"><PosterArt poster={data.spotlight.event.poster} title={data.spotlight.event.title} showText={false} /></div>
@@ -176,7 +266,7 @@ export default function Home() {
           <div className="mt-12 overflow-hidden">
             <div className="flex w-max animate-marquee gap-12">
               {[...(data.orgs ?? []), ...(data.orgs ?? [])].map((o, i) => (
-                <span key={i} className="font-display text-2xl font-extrabold text-ink-4">{o.name}</span>
+                <span key={i} className="flex items-center gap-12 font-poster text-3xl uppercase text-ink-4">{o.name}<Sparkle className="h-4 w-4 text-brand" /></span>
               ))}
             </div>
           </div>
@@ -186,9 +276,9 @@ export default function Home() {
       {/* organizer pitch */}
       <section className="container-x mt-24">
         <div className="text-center">
-          <h2 className="mx-auto max-w-3xl text-4xl font-black tracking-tight sm:text-5xl">Throw a party. Build a community. Find your people.</h2>
+          <h2 className="headline mx-auto max-w-3xl text-5xl sm:text-7xl">Throw a party. Build a community. Find your people.</h2>
           <p className="mx-auto mt-4 max-w-xl text-ink-2">Everything you need to create, sell out and scale your events — in one Organizer Dashboard.</p>
-          <Link to="/platform" className="btn btn-primary btn-lg mt-6">Bpop for Organizers</Link>
+          <Link to="/platform" className="btn btn-primary btn-lg mt-6">B-POP for Organizers</Link>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {posters.slice(5, 8).map((e, i) => (
@@ -202,10 +292,10 @@ export default function Home() {
           {[
             { n: '01', k: 'Create', t: 'Bring your idea to life', b: 'Design an event page as unique as your event — tiers, lineups, guest lists and door sales.', icon: <Sparkles className="h-5 w-5" /> },
             { n: '02', k: 'Earn', t: 'We’ll help you find your crowd', b: 'Get discovered in the Explore feed, turn buyers into promoters with Kickbacks and text your audience for free.', icon: <Megaphone className="h-5 w-5" /> },
-            { n: '03', k: 'Scale', t: 'Turn your community into culture', b: 'Make data-backed decisions with real-time insights, and ask Bpop AI anything about your events.', icon: <Rocket className="h-5 w-5" /> },
+            { n: '03', k: 'Scale', t: 'Turn your community into culture', b: 'Make data-backed decisions with real-time insights, and ask B-POP AI anything about your events.', icon: <Rocket className="h-5 w-5" /> },
           ].map((s) => (
             <div key={s.n}>
-              <p className="flex items-center gap-2 text-sm font-bold text-brand">{s.icon}{s.n}. {s.k}</p>
+              <p className="flex items-center gap-2 text-sm font-bold text-brand-dark">{s.icon}{s.n}. {s.k}</p>
               <h3 className="mt-2 text-2xl font-extrabold">{s.t}</h3>
               <p className="mt-2 text-ink-3">{s.b}</p>
               <Link to="/platform" className="mt-3 inline-flex text-sm font-semibold underline underline-offset-4">Learn more</Link>
@@ -218,7 +308,7 @@ export default function Home() {
       <section className="container-x mt-24">
         <div className="grid overflow-hidden rounded-4xl bg-ink text-white md:grid-cols-2">
           <div className="p-8 sm:p-12">
-            <p className="font-display text-3xl font-bold leading-snug">“Bpop let us take one Friday run around the lake and turn it into a city-wide community.”</p>
+            <p className="font-display text-3xl font-bold leading-snug">“B-POP let us take one Friday run around the lake and turn it into a city-wide community.”</p>
             <p className="mt-6 font-semibold">Gulshan Run Club</p>
             <p className="text-sm text-white/60">Free community runs every Friday & Saturday</p>
             <Link to="/g/gulshan-run-club" className="btn btn-lg mt-6 bg-white text-ink hover:bg-white/90">View organizer</Link>
@@ -231,17 +321,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* editorial */}
+      {/* magazine */}
       <section className="container-x mt-24">
-        <h2 className="text-3xl font-black tracking-tight">Editorial</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <SectionHead
+          sub={<span className="tag-pop">B-POP Magazine</span>}
+          action={<a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-outline btn-md shrink-0"><Instagram className="h-4 w-4" />@bpop.tags</a>}
+        >
+          Stories from the scene
+        </SectionHead>
+        <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { t: 'The return of the adda', b: 'Why Dhaka’s twenty-somethings are swapping clubs for long tables and longer conversations.', seed: 7001, style: 'wave' as const, hues: [200, 260] as [number, number] },
-            { t: 'Rooftops after dark', b: 'A night with the collectives turning the city skyline into a dance floor.', seed: 7002, style: 'grid' as const, hues: [290, 330] as [number, number] },
-            { t: 'Run clubs are the new night out', b: 'Pace groups, cha stalls and the friendships made at 6:30am.', seed: 7003, style: 'sun' as const, hues: [95, 160] as [number, number] },
+            { k: 'Off the grid', t: 'Rebirth of Dhaka’s music culture', b: 'Bedroom producers, basement shows and the collectives building a new sound for the city.', seed: 7001, style: 'zine' as const, hues: [330, 0] as [number, number] },
+            { k: 'We found art', t: 'Looking for physical media shops in Dhaka?', b: 'Vinyl, cassettes, comics and zines — a field guide to the city’s last record shops.', seed: 7002, style: 'grid' as const, hues: [290, 330] as [number, number] },
+            { k: 'On our radar', t: 'Run clubs are the new night out', b: 'Pace groups, cha stalls and the friendships made at 5:45am.', seed: 7003, style: 'sun' as const, hues: [95, 160] as [number, number] },
           ].map((s) => (
             <article key={s.t} className="group">
-              <div className="aspect-[4/3] overflow-hidden rounded-3xl"><PosterArt poster={{ seed: s.seed, style: s.style, hues: s.hues }} title={s.t} showText={false} className="transition duration-500 group-hover:scale-105" /></div>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
+                <PosterArt poster={{ seed: s.seed, style: s.style, hues: s.hues }} title={s.t} showText={false} className="transition duration-500 group-hover:scale-105" />
+                <span className="absolute bottom-3 left-3 rounded-full bg-white px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em]">{s.k}</span>
+              </div>
               <h3 className="mt-3 text-xl font-extrabold">{s.t}</h3>
               <p className="mt-1 text-sm text-ink-3">{s.b}</p>
             </article>
@@ -252,12 +350,12 @@ export default function Home() {
       {/* CTA tiles */}
       <section className="container-x mt-24 grid gap-4 sm:grid-cols-2">
         <Link to="/create" className="group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-4xl p-7 text-white">
-          <div className="absolute inset-0"><PosterArt poster={{ seed: 991, style: 'gradient', hues: [300, 20] }} title="" showText={false} className="transition duration-500 group-hover:scale-105" /></div>
-          <div className="relative"><p className="text-sm font-semibold opacity-80"><Users className="mb-1 inline h-4 w-4" /> Host an event</p><p className="font-display text-3xl font-extrabold">Create your world</p></div>
+          <div className="absolute inset-0"><PosterArt poster={{ seed: 991, style: 'zine', hues: [320, 0] }} title="" showText={false} className="transition duration-500 group-hover:scale-105" /></div>
+          <div className="relative"><p className="text-sm font-semibold opacity-80"><Users className="mb-1 inline h-4 w-4" /> Host an event</p><p className="headline text-4xl">Create your world</p></div>
         </Link>
         <Link to="/explore" className="group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-4xl p-7 text-white">
           <div className="absolute inset-0"><PosterArt poster={{ seed: 992, style: 'grid', hues: [210, 260] }} title="" showText={false} className="transition duration-500 group-hover:scale-105" /></div>
-          <div className="relative"><p className="text-sm font-semibold opacity-80"><Wallet className="mb-1 inline h-4 w-4" /> Explore events</p><p className="font-display text-3xl font-extrabold">Find your world</p></div>
+          <div className="relative"><p className="text-sm font-semibold opacity-80"><Wallet className="mb-1 inline h-4 w-4" /> Explore events</p><p className="headline text-4xl">Find your world</p></div>
         </Link>
       </section>
     </div>
