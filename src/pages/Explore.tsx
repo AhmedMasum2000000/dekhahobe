@@ -25,7 +25,7 @@ const PRICE_OPTS: [NonNullable<ExploreFilters['price']>, string][] = [
 function Select<T extends string>({ label, value, options, onChange, testId }: { label: string; value: T; options: [T, string][]; onChange: (v: T) => void; testId: string }) {
   const active = value !== options[0]![0];
   return (
-    <label className={`relative inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold ${active ? 'border-ink bg-ink text-white' : 'border-line bg-white text-ink-2'}`}>
+    <label className={`relative inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold ${active ? 'border-ink bg-action text-white' : 'border-line bg-surface text-ink-2'}`}>
       <span className="pointer-events-none">{active ? options.find((o) => o[0] === value)?.[1] : label}</span>
       <select aria-label={label} data-testid={testId} className="absolute inset-0 cursor-pointer opacity-0" value={value} onChange={(e) => onChange(e.target.value as T)}>
         {options.map(([v, l]) => (

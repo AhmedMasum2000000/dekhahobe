@@ -88,7 +88,7 @@ export function Badge({ children, tone = 'neutral', className = '' }: { children
     ok: 'bg-green-50 text-ok',
     warn: 'bg-amber-50 text-warn',
     bad: 'bg-red-50 text-bad',
-    dark: 'bg-ink text-white',
+    dark: 'bg-action text-white',
   };
   return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${tones[tone]} ${className}`}>{children}</span>;
 }
@@ -109,7 +109,7 @@ export function Modal({ open, onClose, title, children, wide = false, footer }: 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className={`relative flex max-h-[92vh] w-full animate-rise flex-col rounded-t-4xl bg-white shadow-2xl sm:rounded-4xl ${wide ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
+      <div className={`relative flex max-h-[92vh] w-full animate-rise flex-col rounded-t-4xl bg-surface shadow-2xl sm:rounded-4xl ${wide ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <h3 className="text-lg font-bold">{title}</h3>
           <button className="btn btn-ghost h-9 w-9 p-0" onClick={onClose} aria-label="Close">
@@ -152,7 +152,7 @@ export function Toggle({ checked, onChange, label, hint, disabled }: { checked: 
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition ${checked ? 'bg-ink' : 'bg-zinc-200'}`}
+        className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition ${checked ? 'bg-action' : 'bg-zinc-200'}`}
       >
         <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${checked ? 'left-[22px]' : 'left-0.5'}`} />
       </button>
@@ -172,7 +172,7 @@ export function Tabs<T extends string>({ tabs, value, onChange, className = '' }
           className={`relative shrink-0 px-3 py-3 text-sm font-semibold transition ${value === t.id ? 'text-ink' : 'text-ink-3 hover:text-ink'}`}
         >
           {t.label}
-          {value === t.id && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-ink" />}
+          {value === t.id && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-action" />}
         </button>
       ))}
     </div>

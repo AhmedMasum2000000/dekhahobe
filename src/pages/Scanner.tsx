@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Camera, CameraOff, CheckCircle2, KeyRound, ListChecks, ScanLine, XCircle } from 'lucide-react';
@@ -60,7 +61,7 @@ function Camera1({ onScan }: { onScan: (text: string) => void }) {
     };
   }, [on]);
   return (
-    <div className="overflow-hidden rounded-3xl bg-ink">
+    <div className="overflow-hidden rounded-3xl bg-action">
       <div id="qr-reader" className={`${on ? 'min-h-[300px]' : 'hidden'} w-full`} />
       {!on && (
         <button className="flex h-64 w-full flex-col items-center justify-center gap-3 text-white" onClick={() => { setErr(''); setOn(true); }} data-testid="start-camera">
@@ -155,9 +156,10 @@ export default function Scanner() {
   const hasAccess = !!scannerOrgId || (events?.length ?? 0) > 0 || !!user;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] px-4 py-6">
+    <div className="min-h-screen bg-mist px-4 py-6">
       <div className="mx-auto mb-6 flex max-w-md items-center justify-between">
         <Link to="/"><Logo /></Link>
+        <ThemeToggle />
         <span className="flex items-center gap-1 text-sm font-semibold text-ink-3"><ScanLine className="h-4 w-4" />Door scanner</span>
       </div>
       {current ? (

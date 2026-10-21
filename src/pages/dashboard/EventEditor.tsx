@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Dices, ImagePlus, Plus, Trash2 } from 'lucide-react';
@@ -299,20 +300,21 @@ function CreateInner() {
   const last = step === STEPS.length - 1;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      <header className="sticky top-0 z-30 border-b border-line bg-white">
-        <div className="container-x flex h-16 items-center justify-between">
-          <button className="flex items-center gap-2" onClick={() => nav(-1)}><ArrowLeft className="h-4 w-4" /><Logo mark /></button>
-          <div className="flex items-center gap-2 text-sm"><span className="hidden text-ink-3 sm:inline">Hosting as</span>
-            {managed.length > 1 ? <select className="h-9 rounded-full border border-line px-3 font-semibold" value={org.org.id} onChange={(e) => setOrg(e.target.value)}>{managed.map((o) => <option key={o.org.id} value={o.org.id}>{o.org.name}</option>)}</select> : <strong>{org.org.name}</strong>}
+    <div className="min-h-screen bg-mist">
+      <header className="sticky top-0 z-30 border-b border-line bg-surface">
+        <div className="container-x flex h-16 items-center justify-between gap-2">
+          <button className="flex shrink-0 items-center gap-2" onClick={() => nav(-1)}><ArrowLeft className="h-4 w-4" /><Logo mark /></button>
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-sm"><span className="hidden shrink-0 text-ink-3 sm:inline">Hosting as</span>
+            {managed.length > 1 ? <select className="h-9 min-w-0 max-w-full truncate rounded-full border border-line bg-surface px-3 font-semibold" value={org.org.id} onChange={(e) => setOrg(e.target.value)}>{managed.map((o) => <option key={o.org.id} value={o.org.id}>{o.org.name}</option>)}</select> : <strong className="truncate">{org.org.name}</strong>}
           </div>
-          <button className="btn btn-outline btn-sm" disabled={busy} onClick={() => save('draft')}>Save draft</button>
+          <ThemeToggle />
+          <button className="btn btn-outline btn-sm shrink-0" disabled={busy} onClick={() => save('draft')}>Save draft</button>
         </div>
       </header>
       <div className="container-x grid gap-8 py-8 lg:grid-cols-[1fr_340px]">
-        <div>
+        <div className="min-w-0">
           <div className="no-scrollbar mb-6 flex gap-1 overflow-x-auto">
-            {STEPS.map((s, i) => <button key={s} className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold ${i === step ? 'bg-ink text-white' : i < step ? 'bg-mist text-ink' : 'text-ink-4'}`} onClick={() => setStep(i)}>{i + 1}. {s}</button>)}
+            {STEPS.map((s, i) => <button key={s} className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold ${i === step ? 'bg-action text-white' : i < step ? 'bg-mist text-ink' : 'text-ink-4'}`} onClick={() => setStep(i)}>{i + 1}. {s}</button>)}
           </div>
           <div className="card p-5 sm:p-6">
             <h1 className="mb-5 text-2xl font-black tracking-tight">{STEPS[step]}</h1>

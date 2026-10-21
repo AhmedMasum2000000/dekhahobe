@@ -38,7 +38,7 @@ export function OrgProfile() {
       <div className="h-44 overflow-hidden sm:h-64"><PosterArt poster={{ seed: org.bannerSeed, style: 'gradient', hues: [org.avatarHue, (org.avatarHue + 50) % 360] }} title="" showText={false} /></div>
       <div className="container-x max-w-3xl">
         <div className="-mt-14 flex items-end justify-between gap-3">
-          <div className="rounded-full border-4 border-white bg-white"><Avatar name={org.name} hue={org.avatarHue} url={org.avatarUrl} size={104} /></div>
+          <div className="rounded-full border-4 border-white bg-surface"><Avatar name={org.name} hue={org.avatarHue} url={org.avatarUrl} size={104} /></div>
           <FollowButton orgId={org.id} size="md" />
         </div>
         <h1 className="headline mt-3 flex items-center gap-2 text-5xl" data-testid="org-name">{org.name}{org.verified && <Verified className="h-6 w-6" />}</h1>
@@ -186,7 +186,7 @@ function KickbacksInner() {
     <div className="container-x max-w-3xl pb-16 pt-8">
       <h1 className="headline text-5xl">Kickbacks</h1>
       <p className="mt-2 text-ink-3">Share events with your personal link and earn when friends buy tickets.</p>
-      <div className="mt-6 rounded-3xl bg-ink p-6 text-white">
+      <div className="mt-6 rounded-3xl bg-action p-6 text-white">
         <p className="text-sm opacity-70">Total earned</p>
         <p className="font-display text-4xl font-extrabold" data-testid="kickback-total">{data ? tk(data.total) : '—'}</p>
         <p className="mt-2 text-xs opacity-60">Earnings are paid to your bKash after each event ends. See <Link to="/terms/kickback-terms" className="underline">Kickback Terms</Link>.</p>

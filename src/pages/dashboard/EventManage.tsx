@@ -104,7 +104,7 @@ function OverviewTab({ ev }: { ev: BpopEvent }) {
             <div key={b.ticketType.id} className="border-b border-line py-3 last:border-0">
               <div className="flex justify-between text-sm"><span className="font-semibold">{b.ticketType.name}</span><span>{tk(b.revenue)}</span></div>
               <div className="mt-1.5 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-mist"><div className="h-full rounded-full bg-ink" style={{ width: `${b.ticketType.quantity ? Math.min(100, (b.sold / b.ticketType.quantity) * 100) : 0}%` }} /></div>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-mist"><div className="h-full rounded-full bg-action" style={{ width: `${b.ticketType.quantity ? Math.min(100, (b.sold / b.ticketType.quantity) * 100) : 0}%` }} /></div>
                 <span className="text-xs text-ink-3">{b.sold}{b.ticketType.quantity ? `/${b.ticketType.quantity}` : ''}</span>
               </div>
             </div>

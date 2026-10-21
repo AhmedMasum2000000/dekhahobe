@@ -79,12 +79,12 @@ export function Platform() {
 
       <section className="container-x mt-20">
         <div className="rounded-4xl bg-mist p-4 sm:p-8">
-          <div className="grid gap-4 rounded-3xl bg-white p-5 shadow-card sm:grid-cols-4">
+          <div className="grid gap-4 rounded-3xl bg-surface p-5 shadow-card sm:grid-cols-4">
             {[['Revenue', data ? tk(data.revenue) : '—'], ['Tickets', data?.tickets.toLocaleString() ?? '—'], ['Events', String(data?.events ?? '—')], ['Organizers', String(data?.organizers ?? '—')]].map(([l, v]) => (
               <div key={l} className="rounded-2xl border border-line p-4 text-left"><p className="text-xs text-ink-3">{l}</p><p className="font-display text-xl font-extrabold">{v}</p></div>
             ))}
             <div className="col-span-full flex h-32 items-end gap-1.5">
-              {Array.from({ length: 30 }, (_, i) => <span key={i} className="flex-1 rounded-t bg-ink" style={{ height: `${25 + ((i * 37) % 70)}%`, opacity: 0.25 + (i / 30) * 0.75 }} />)}
+              {Array.from({ length: 30 }, (_, i) => <span key={i} className="flex-1 rounded-t bg-action" style={{ height: `${25 + ((i * 37) % 70)}%`, opacity: 0.25 + (i / 30) * 0.75 }} />)}
             </div>
           </div>
           <div className="mt-6 text-center">

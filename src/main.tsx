@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { reloadOnce } from './components/ErrorBoundary';
+import { initializeTheme } from './store/theme';
+
+initializeTheme();
 
 // A code file from an older deploy is gone: load the current version instead of failing.
 window.addEventListener('vite:preloadError', (e) => {

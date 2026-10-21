@@ -29,11 +29,11 @@ function PosterRow({ events, reverse, paused }: { events: BpopEvent[]; reverse?:
 function StoreButtons() {
   return (
     <div className="flex flex-wrap gap-2">
-      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-ink px-4 text-white">
+      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-action px-4 text-white">
         <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white" aria-hidden><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9C6.1 7 4.6 8 3.7 9.5c-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.9-1.1-2.9-4.3zM14 5.3c.7-.8 1.2-2 1-3.2-1 .1-2.2.7-3 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.3-.6 3-1.4z" /></svg>
         <span className="text-left leading-none"><span className="block text-[10px] opacity-75">Download on the</span><span className="text-[15px] font-semibold">App Store</span></span>
       </Link>
-      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-ink px-4 text-white">
+      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-action px-4 text-white">
         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden><path fill="#fff" d="M4 2.8v18.4c0 .4.4.6.7.4l10.6-9.2c.2-.2.2-.6 0-.8L4.7 2.4c-.3-.2-.7 0-.7.4z" /><path fill="#E6007E" d="M15.3 12.4 18 15l2.8-1.6c.6-.4.6-1.2 0-1.6L18 10.2z" /></svg>
         <span className="text-left leading-none"><span className="block text-[10px] opacity-75">Get it on</span><span className="text-[15px] font-semibold">Google Play</span></span>
       </Link>
@@ -43,8 +43,8 @@ function StoreButtons() {
 
 function PhoneMock({ children, tilt = 0 }: { children: React.ReactNode; tilt?: number }) {
   return (
-    <div className="relative h-[420px] w-[210px] shrink-0 rounded-[2.4rem] border-[7px] border-ink bg-white shadow-2xl" style={{ transform: `rotate(${tilt}deg)` }}>
-      <div className="absolute left-1/2 top-2 h-5 w-20 -translate-x-1/2 rounded-full bg-ink" />
+    <div className="relative h-[420px] w-[210px] shrink-0 rounded-[2.4rem] border-[7px] border-ink bg-surface shadow-2xl" style={{ transform: `rotate(${tilt}deg)` }}>
+      <div className="absolute left-1/2 top-2 h-5 w-20 -translate-x-1/2 rounded-full bg-action" />
       <div className="h-full overflow-hidden rounded-[1.9rem] pt-8">{children}</div>
     </div>
   );
@@ -132,8 +132,8 @@ export default function Home() {
             <PosterRow events={rows[0]!} paused={!marqueeOn} />
             <PosterRow events={rows[1]!} reverse paused={!marqueeOn} />
             <PosterRow events={rows[2]!} paused={!marqueeOn} />
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[10%] bg-gradient-to-r from-white to-transparent" aria-hidden />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[10%] bg-gradient-to-l from-white to-transparent" aria-hidden />
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[10%] bg-gradient-to-r from-surface to-transparent" aria-hidden />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[10%] bg-gradient-to-l from-surface to-transparent" aria-hidden />
           </div>
         )}
       </section>
@@ -190,10 +190,10 @@ export default function Home() {
             </SectionHead>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
               {data.recap.map((c) => (
-                <Link key={c.event.id} to={`/e/${c.event.slug}`} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-ink">
+                <Link key={c.event.id} to={`/e/${c.event.slug}`} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-action">
                   <PosterArt poster={c.event.poster} title={c.event.title} className="transition duration-500 group-hover:scale-[1.03]" />
                   <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-                    <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold">{dayLabel(c.event.startsAt)}</span>
+                    <span className="rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold">{dayLabel(c.event.startsAt)}</span>
                     {c.goingCount > 0 && <span className="rounded-full bg-brand px-2.5 py-1 text-[11px] font-bold text-white">{c.goingCount.toLocaleString()} went</span>}
                   </div>
                 </Link>
@@ -244,7 +244,7 @@ export default function Home() {
                   <div className="px-3">
                     <div className="aspect-[4/5] overflow-hidden rounded-xl"><PosterArt poster={posters[4].poster} title={posters[4].title} /></div>
                     <p className="mt-2 text-[12px] font-bold leading-tight">{posters[4].title}</p>
-                    <div className="mt-3 rounded-full bg-ink py-2 text-center text-[11px] font-bold text-white">Get tickets</div>
+                    <div className="mt-3 rounded-full bg-action py-2 text-center text-[11px] font-bold text-white">Get tickets</div>
                   </div>
                 )}
               </PhoneMock>
@@ -318,7 +318,7 @@ export default function Home() {
           {posters.slice(5, 8).map((e, i) => (
             <div key={e.id} className="relative aspect-[4/5] overflow-hidden rounded-3xl">
               <PosterArt poster={e.poster} title={e.title} />
-              <span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 font-display text-lg font-extrabold shadow">{tk([64000, 298300, 839500][i]!)}</span>
+              <span className="absolute bottom-4 right-4 rounded-full bg-surface px-4 py-2 font-display text-lg font-extrabold shadow">{tk([64000, 298300, 839500][i]!)}</span>
             </div>
           ))}
         </div>
@@ -340,12 +340,12 @@ export default function Home() {
 
       {/* organizer quote */}
       <section className="container-x mt-24">
-        <div className="grid overflow-hidden rounded-4xl bg-ink text-white md:grid-cols-2">
+        <div className="grid overflow-hidden rounded-4xl bg-action text-white md:grid-cols-2">
           <div className="p-8 sm:p-12">
             <p className="font-display text-3xl font-bold leading-snug">“B-POP let us take one Friday run around the lake and turn it into a city-wide community.”</p>
             <p className="mt-6 font-semibold">Gulshan Run Club</p>
             <p className="text-sm text-white/60">Free community runs every Friday & Saturday</p>
-            <Link to="/g/gulshan-run-club" className="btn btn-lg mt-6 bg-white text-ink hover:bg-white/90">View organizer</Link>
+            <Link to="/g/gulshan-run-club" className="btn btn-lg mt-6 bg-surface text-ink hover:bg-surface/90">View organizer</Link>
           </div>
           <div className="grid grid-cols-2 gap-3 p-6">
             {posters.slice(8, 12).map((e) => (
@@ -372,7 +372,7 @@ export default function Home() {
             <article key={s.t} className="group">
               <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
                 <PosterArt poster={{ seed: s.seed, style: s.style, hues: s.hues }} title={s.t} showText={false} className="transition duration-500 group-hover:scale-105" />
-                <span className="absolute bottom-3 left-3 rounded-full bg-white px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em]">{s.k}</span>
+                <span className="absolute bottom-3 left-3 rounded-full bg-surface px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em]">{s.k}</span>
               </div>
               <h3 className="mt-3 text-xl font-extrabold">{s.t}</h3>
               <p className="mt-1 text-sm text-ink-3">{s.b}</p>

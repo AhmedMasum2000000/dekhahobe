@@ -266,7 +266,7 @@ function Chat({ ev }: { ev: BpopEvent }) {
             {msgs?.map((m) => (
               <div key={m.id} className={`flex gap-2 ${m.userId === user?.id ? 'flex-row-reverse' : ''}`}>
                 <Avatar name={m.user.name} hue={m.user.avatarHue} url={m.user.avatarUrl} size={28} />
-                <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.userId === user?.id ? 'bg-ink text-white' : 'bg-mist'}`}>
+                <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${m.userId === user?.id ? 'bg-action text-white' : 'bg-mist'}`}>
                   {m.userId !== user?.id && <p className="text-[11px] font-semibold text-ink-3">{m.user.name}</p>}
                   {m.body}
                 </div>
@@ -397,7 +397,7 @@ export default function EventPage() {
               </div>
             )}
             {holder && (
-              <Link to="/tickets" className="flex items-center justify-between rounded-2xl bg-ink p-4 text-white">
+              <Link to="/tickets" className="flex items-center justify-between rounded-2xl bg-action p-4 text-white">
                 <span className="flex items-center gap-2 font-semibold"><TicketIcon className="h-5 w-5" />You have {myTix.length} ticket{myTix.length > 1 ? 's' : ''}</span>
                 <span className="text-sm underline">View</span>
               </Link>
@@ -424,7 +424,7 @@ export default function EventPage() {
               <div>
                 <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
                   {series.slice(0, 8).map((s) => (
-                    <Link key={s.id} to={`/e/${s.slug}`} className={`shrink-0 rounded-2xl border px-4 py-2.5 text-center ${s.id === ev.id ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink-4'}`}>
+                    <Link key={s.id} to={`/e/${s.slug}`} className={`shrink-0 rounded-2xl border px-4 py-2.5 text-center ${s.id === ev.id ? 'border-ink bg-action text-white' : 'border-line hover:border-ink-4'}`}>
                       <p className="text-sm font-bold">{monthDay(s.startsAt)}</p>
                       <p className="text-xs opacity-75">{weekday(s.startsAt)} · {timeLabel(s.startsAt)}</p>
                     </Link>
@@ -490,8 +490,8 @@ export default function EventPage() {
             </section>
 
             <section className="flex items-center gap-5 rounded-3xl bg-mist p-5">
-              <div className="hidden h-24 w-24 shrink-0 grid-cols-5 gap-0.5 rounded-xl bg-white p-2 sm:grid" aria-hidden>
-                {Array.from({ length: 25 }, (_, i) => <span key={i} className={`${(i * 7) % 3 ? 'bg-ink' : ''} rounded-[1px]`} />)}
+              <div className="hidden h-24 w-24 shrink-0 grid-cols-5 gap-0.5 rounded-xl bg-surface p-2 sm:grid" aria-hidden>
+                {Array.from({ length: 25 }, (_, i) => <span key={i} className={`${(i * 7) % 3 ? 'bg-action' : ''} rounded-[1px]`} />)}
               </div>
               <div>
                 <p className="font-bold">Get the app for more features</p>
@@ -504,7 +504,7 @@ export default function EventPage() {
       </div>
 
       {/* sticky CTA */}
-      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-line bg-white md:bottom-0">
+      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-line bg-surface md:bottom-0">
         <div className="container-x flex items-center justify-between gap-3 py-3">
           <div className="hidden min-w-0 sm:block">
             <p className="truncate font-bold">{ev.title}</p>

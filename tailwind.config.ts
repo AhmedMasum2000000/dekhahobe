@@ -5,11 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: '#0A0A0A', 2: '#3F3F46', 3: '#71717A', 4: '#A1A1AA' },
-        line: '#E9E9EC',
-        mist: '#F6F6F7',
+        ink: {
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
+          2: 'rgb(var(--ink-2) / <alpha-value>)',
+          3: 'rgb(var(--ink-3) / <alpha-value>)',
+          4: 'rgb(var(--ink-4) / <alpha-value>)',
+        },
+        surface: 'rgb(var(--surface) / <alpha-value>)',
+        action: 'rgb(var(--action) / <alpha-value>)',
+        line: 'rgb(var(--line) / <alpha-value>)',
+        mist: 'rgb(var(--mist) / <alpha-value>)',
         // B-POP TAGS palette, sampled from the brand logo
-        brand: { DEFAULT: '#FA02A3', dark: '#C4007F', soft: '#FED7EF', light: '#FFF0F8' },
+        brand: { DEFAULT: '#FA02A3', dark: '#C4007F', soft: 'rgb(var(--brand-soft) / <alpha-value>)', light: 'rgb(var(--brand-light) / <alpha-value>)' },
         pop: { red: '#E3001B', cream: '#FFFAF3' },
         ok: '#16A34A',
         warn: '#D97706',

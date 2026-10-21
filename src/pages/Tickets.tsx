@@ -159,7 +159,7 @@ function TicketDetailInner() {
           <p className="text-center font-mono text-lg font-bold tracking-widest" data-testid="ticket-code">{ticket.code}</p>
           {siblings.length > 1 && (
             <div className="flex justify-center gap-1.5">
-              {siblings.map((s, i) => <button key={s.ticket.id} className={`h-2 rounded-full transition-all ${i === idx ? 'w-6 bg-ink' : 'w-2 bg-zinc-300'}`} onClick={() => setPicked(i)} aria-label={`Ticket ${i + 1}`} />)}
+              {siblings.map((s, i) => <button key={s.ticket.id} className={`h-2 rounded-full transition-all ${i === idx ? 'w-6 bg-action' : 'w-2 bg-zinc-300'}`} onClick={() => setPicked(i)} aria-label={`Ticket ${i + 1}`} />)}
             </div>
           )}
           <div className="space-y-2 border-t border-dashed border-line pt-4 text-sm">

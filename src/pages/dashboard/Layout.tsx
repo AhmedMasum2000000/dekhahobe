@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { BarChart3, CalendarDays, ChevronDown, Home, LayoutDashboard, MessageSquare, Plus, ScanLine, Settings, Wallet } from 'lucide-react';
@@ -93,11 +94,11 @@ function Inner() {
     { to: '/dashboard/settings', label: 'Settings', icon: <Settings className="h-[18px] w-[18px]" />, show: manager },
     { to: '/scanner', label: 'Scan tickets', icon: <ScanLine className="h-[18px] w-[18px]" />, show: true },
   ].filter((l) => l.show);
-  const linkCls = ({ isActive }: { isActive: boolean }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${isActive ? 'bg-ink text-white' : 'text-ink-2 hover:bg-mist'}`;
+  const linkCls = ({ isActive }: { isActive: boolean }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${isActive ? 'bg-action text-white' : 'text-ink-2 hover:bg-mist'}`;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-white p-4 lg:flex">
+    <div className="min-h-screen bg-mist">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-surface p-4 lg:flex">
         <Link to="/" className="mb-6 px-2"><Logo /></Link>
         <div className="relative mb-4">
           <button className="flex w-full items-center gap-3 rounded-2xl border border-line p-2.5 text-left hover:bg-mist" onClick={() => setSwitcher(!switcher)} data-testid="org-switcher">
@@ -106,7 +107,7 @@ function Inner() {
             <ChevronDown className="h-4 w-4 text-ink-3" />
           </button>
           {switcher && (
-            <div className="absolute inset-x-0 top-full z-40 mt-1 rounded-2xl border border-line bg-white p-1.5 shadow-card">
+            <div className="absolute inset-x-0 top-full z-40 mt-1 rounded-2xl border border-line bg-surface p-1.5 shadow-card">
               {orgs!.map((o) => (
                 <button key={o.org.id} className="flex w-full items-center gap-2 rounded-xl p-2 text-left text-sm hover:bg-mist" onClick={() => { setOrg(o.org.id); setSwitcher(false); nav('/dashboard'); }}>
                   <Avatar name={o.org.name} hue={o.org.avatarHue} size={24} />{o.org.name}
@@ -119,20 +120,22 @@ function Inner() {
         {manager && <Link to="/create" className="btn btn-primary btn-md mb-4" data-testid="dash-create"><Plus className="h-4 w-4" />Create event</Link>}
         <nav className="flex flex-col gap-1">{links.map((l) => <NavLink key={l.to} to={l.to} end={l.end} className={linkCls}>{l.icon}{l.label}</NavLink>)}</nav>
         <div className="mt-auto">
+          <div className="px-3 py-2"><ThemeToggle /></div>
           <Link to={`/g/${org.slug}`} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-3 hover:bg-mist"><Home className="h-[18px] w-[18px]" />Public profile</Link>
           <Link to="/explore" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-3 hover:bg-mist">← Attendee view</Link>
         </div>
       </aside>
 
-      <header className="sticky top-0 z-30 border-b border-line bg-white lg:hidden">
+      <header className="sticky top-0 z-30 border-b border-line bg-surface lg:hidden">
         <div className="flex h-14 items-center justify-between px-4">
           <Link to="/"><Logo mark /></Link>
-          <select className="h-9 max-w-[55%] truncate rounded-full border border-line bg-white px-3 text-sm font-semibold" value={org.id} onChange={(e) => { setOrg(e.target.value); nav('/dashboard'); }} aria-label="Organization">
+          <select className="h-9 max-w-[55%] truncate rounded-full border border-line bg-surface px-3 text-sm font-semibold" value={org.id} onChange={(e) => { setOrg(e.target.value); nav('/dashboard'); }} aria-label="Organization">
             {orgs!.map((o) => <option key={o.org.id} value={o.org.id}>{o.org.name}</option>)}
           </select>
+          <ThemeToggle />
           {manager ? <Link to="/create" className="btn btn-primary btn-sm"><Plus className="h-4 w-4" />Event</Link> : <span />}
         </div>
-        <nav className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-2">{links.map((l) => <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => `shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold ${isActive ? 'bg-ink text-white' : 'bg-mist text-ink-2'}`}>{l.label}</NavLink>)}</nav>
+        <nav className="no-scrollbar flex gap-1 overflow-x-auto px-3 pb-2">{links.map((l) => <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => `shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold ${isActive ? 'bg-action text-white' : 'bg-mist text-ink-2'}`}>{l.label}</NavLink>)}</nav>
       </header>
 
       <main className="px-4 py-6 sm:px-6 lg:ml-64 lg:px-10 lg:py-10">

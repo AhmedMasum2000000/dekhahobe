@@ -119,7 +119,7 @@ export function EventsList() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2"><p className="truncate font-bold">{event.title}</p>{event.status !== 'published' && <Badge tone={event.status === 'draft' ? 'warn' : 'bad'}>{event.status}</Badge>}</div>
                   <p className="text-sm text-ink-3">{dayYearLabel(event.startsAt)} · {event.venue.name}</p>
-                  {stats.capacity !== null && <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-mist"><div className="h-full rounded-full bg-ink" style={{ width: `${pct}%` }} /></div>}
+                  {stats.capacity !== null && <div className="mt-2 h-1.5 w-48 overflow-hidden rounded-full bg-mist"><div className="h-full rounded-full bg-action" style={{ width: `${pct}%` }} /></div>}
                 </div>
               </Link>
               <div className="flex items-center gap-6 text-sm">
@@ -184,7 +184,7 @@ export function Insights() {
         <div className="mt-4 space-y-3" data-testid="ai-chat">
           {chat.map((c, i) => (
             <div key={i} className="space-y-2">
-              <p className="ml-auto w-fit max-w-[80%] rounded-2xl bg-ink px-4 py-2 text-sm text-white">{c.q}</p>
+              <p className="ml-auto w-fit max-w-[80%] rounded-2xl bg-action px-4 py-2 text-sm text-white">{c.q}</p>
               <p className="w-fit max-w-[90%] rounded-2xl bg-mist px-4 py-2 text-sm">{c.a.split(/(\*\*[^*]+\*\*)/g).map((seg, k) => (seg.startsWith('**') ? <strong key={k}>{seg.slice(2, -2)}</strong> : <span key={k}>{seg}</span>))}</p>
             </div>
           ))}
@@ -237,7 +237,7 @@ export function Sms() {
         </div>
         <div className="rounded-4xl border-[6px] border-ink bg-mist p-4">
           <p className="text-center text-xs font-semibold text-ink-3">Preview</p>
-          <div className="mt-3 max-w-[90%] rounded-2xl rounded-bl-sm bg-white p-3 text-sm shadow-sm">{org.name}: {body || 'Your message…'} Reply STOP to opt out.</div>
+          <div className="mt-3 max-w-[90%] rounded-2xl rounded-bl-sm bg-surface p-3 text-sm shadow-sm">{org.name}: {body || 'Your message…'} Reply STOP to opt out.</div>
         </div>
       </div>
       <div className="card p-5">
