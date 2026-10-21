@@ -8,6 +8,7 @@ import { Avatar, Logo } from './ui';
 import { RouteErrorBoundary } from './ErrorBoundary';
 import { ThemeToggle } from './ThemeToggle';
 import bpopLogo from '@/assets/bpop-logo.png';
+import { ExperienceEffects, MotionToggle } from './ExperienceEffects';
 
 const NAV = [
   { to: '/', label: 'Home', end: true },
@@ -68,13 +69,13 @@ export function TopNav() {
   }, [loc.pathname]);
   const link = ({ isActive }: { isActive: boolean }) => `rounded-full px-3.5 py-2 text-sm font-semibold transition ${isActive ? 'text-ink' : 'text-ink-3 hover:text-ink'}`;
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-surface">
+    <header className="site-header sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-surface">
       <div className="h-1 bg-[linear-gradient(90deg,#FA02A3,#FED7EF_45%,#FA02A3_70%,#E3001B)]" aria-hidden />
       <div className="container-x flex h-16 items-center justify-between gap-3">
         <Link to="/" aria-label="Dekha Hobe home">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={link}>
               {n.label}
@@ -88,23 +89,25 @@ export function TopNav() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <div className="hidden lg:block"><MotionToggle /></div>
           <Link to="/create" className="btn btn-primary btn-md hidden sm:inline-flex" data-testid="nav-create">
             Create event
           </Link>
-          {user ? <UserMenu /> : <Link to="/login" className="btn btn-outline btn-md md:hidden">Login</Link>}
-          <button className="btn btn-ghost h-10 w-10 p-0 md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
+          {user ? <UserMenu /> : <Link to="/login" className="btn btn-outline btn-md lg:hidden">Login</Link>}
+          <button className="btn btn-ghost h-10 w-10 p-0 lg:hidden" onClick={() => setOpen(!open)} aria-label="Menu" aria-expanded={open} aria-controls="primary-mobile-menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
       {open && (
-        <nav className="container-x flex flex-col gap-1 pb-4 md:hidden">
+        <nav id="primary-mobile-menu" className="container-x flex flex-col gap-1 pb-4 lg:hidden">
           {NAV.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `rounded-xl px-3 py-3 text-base font-semibold ${isActive ? 'bg-mist' : ''}`}>
               {n.label}
             </NavLink>
           ))}
           <Link to="/create" className="btn btn-primary btn-lg mt-2">Create event</Link>
+          <MotionToggle className="my-2 self-start" />
         </nav>
       )}
     </header>
@@ -188,8 +191,10 @@ export function AppLayout() {
   }, [loc.pathname]);
   return (
     <div className="min-h-screen bg-surface">
+      <ExperienceEffects />
+      <a className="skip-link" href="#main-content" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus(); }}>Skip to content</a>
       <TopNav />
-      <main className="pb-16 md:pb-0">
+      <main id="main-content" tabIndex={-1} className="pb-16 md:pb-0">
         <RouteErrorBoundary>
           <Outlet />
         </RouteErrorBoundary>

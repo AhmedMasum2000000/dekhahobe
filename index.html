@@ -35,7 +35,7 @@
       })();
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="theme-color" content="#FAF8F5" />
     <script>
       // Apply the saved theme before the first paint, including the loading screen.
       (function () {
@@ -43,16 +43,16 @@
         try { theme = localStorage.getItem('bpop:theme'); } catch (e) {}
         var dark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', dark);
-        document.documentElement.style.backgroundColor = dark ? '#121216' : '#fff';
-        document.documentElement.style.setProperty('--boot-bg', dark ? '#121216' : '#fff');
+        document.documentElement.style.backgroundColor = dark ? '#121216' : '#faf8f5';
+        document.documentElement.style.setProperty('--boot-bg', dark ? '#121216' : '#faf8f5');
         document.documentElement.style.setProperty('--boot-text', dark ? '#b3b3bf' : '#71717a');
         document.documentElement.style.setProperty('--boot-logo', dark ? '#fff' : '#0a0a0a');
-        document.querySelector('meta[name="theme-color"]').content = dark ? '#121216' : '#FFFFFF';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#121216' : '#FAF8F5';
       })();
     </script>
-    <meta name="description" content="Dekha Hobe — curating pop-culture & the underground scene. Discover and host events across Bangladesh." />
-    <meta property="og:title" content="Dekha Hobe | You are on our radar" />
-    <meta property="og:description" content="Upcoming sub-culture events media won't tell you about. Tickets, RSVPs and door check-in for Bangladesh." />
+    <meta name="description" content="Find live music, art shows, nightlife, comedy and community events in Bangladesh. Discover your next plan in Dhaka and beyond with Dekha Hobe." />
+    <meta property="og:title" content="Events in Bangladesh: Music, Art &amp; Nightlife | Dekha Hobe" />
+    <meta property="og:description" content="Discover independent music, art, comedy and nightlife in Bangladesh. Find your people and your next good plan with Dekha Hobe." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://ahmedmasum2000000.github.io/dekhahobe/" />
     <meta property="og:image" content="https://ahmedmasum2000000.github.io/dekhahobe/og.jpg" />
@@ -60,11 +60,17 @@
     <meta property="og:image:height" content="1280" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800;900&family=Anton&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;800&text=%E0%A7%B3&display=swap" rel="stylesheet" />
-    <title>Dekha Hobe | Curating Pop-Culture &amp; Underground Scene</title>
+    <link rel="canonical" href="https://ahmedmasum2000000.github.io/dekhahobe/" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta property="og:site_name" content="Dekha Hobe" />
+    <meta property="og:locale" content="en_BD" />
+    <meta name="twitter:title" content="Events in Bangladesh | Dekha Hobe" />
+    <meta name="twitter:description" content="Independent music, art, comedy and nightlife. Find your next plan in Bangladesh with Dekha Hobe." />
+    <meta name="twitter:image" content="https://ahmedmasum2000000.github.io/dekhahobe/og.jpg" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://ahmedmasum2000000.github.io/dekhahobe/#organization","name":"Dekha Hobe","url":"https://ahmedmasum2000000.github.io/dekhahobe/","logo":"https://ahmedmasum2000000.github.io/dekhahobe/og.jpg","parentOrganization":{"@type":"Organization","name":"Bpop Tags"}},{"@type":"WebSite","@id":"https://ahmedmasum2000000.github.io/dekhahobe/#website","name":"Dekha Hobe","url":"https://ahmedmasum2000000.github.io/dekhahobe/","description":"Independent music, art, nightlife and community event discovery in Bangladesh.","inLanguage":"en-BD","publisher":{"@id":"https://ahmedmasum2000000.github.io/dekhahobe/#organization"}}]}
+    </script>
+    <title>Events in Bangladesh: Music, Art &amp; Nightlife | Dekha Hobe</title>
   </head>
   <body class="bg-surface">
     <div id="root">
@@ -74,6 +80,15 @@
         <button id="boot-retry" type="button" hidden style="border: 0; border-radius: 999px; padding: 12px 22px; background: #fa02a3; color: #fff; font: 600 15px Inter, system-ui, sans-serif; cursor: pointer">Still loading? Tap to reload</button>
       </div>
     </div>
+    <noscript>
+      <style>#boot { display: none; }</style>
+      <section style="max-width: 720px; margin: 50px auto; padding: 24px; font-family: system-ui, sans-serif; line-height: 1.8">
+        <h1>Dekha Hobe — events and culture in Bangladesh</h1>
+        <p>Discover independent live music, art shows, nightlife, comedy and community meetups in Dhaka, Chattogram and beyond. Find your people and your next good plan.</p>
+        <p>Enable JavaScript to explore events, save favorites and try the demo ticketing experience. Payments and SMS are simulated; no money is charged.</p>
+        <p>A concern of Bpop Tags. <a href="https://www.instagram.com/bpop.tags/">Follow our culture updates on Instagram</a>.</p>
+      </section>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

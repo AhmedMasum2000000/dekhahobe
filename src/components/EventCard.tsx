@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { ArrowUpRight, Heart } from 'lucide-react';
 import type { EventCard as Card } from '@/api';
 import { api } from '@/api';
 import { PosterArt } from './PosterArt';
@@ -43,14 +43,15 @@ export function SaveButton({ eventId, className = '' }: { eventId: string; class
 export function EventCard({ card, compact = false }: { card: Card; compact?: boolean }) {
   const { event, org } = card;
   return (
-    <Link to={`/e/${event.slug}`} className="group block" data-testid="event-card">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-mist">
+    <Link to={`/e/${event.slug}`} className="event-card group block" data-testid="event-card">
+      <div className="event-card-art relative aspect-[4/5] overflow-hidden rounded-2xl bg-mist">
         <PosterArt poster={event.poster} title={event.title} className="transition duration-500 group-hover:scale-[1.03]" />
         <div className="absolute left-2.5 top-2.5 flex gap-1.5">
           {card.moreDates && <span className="rounded-full bg-surface/95 px-2.5 py-1 text-[11px] font-bold">More dates</span>}
           {event.sponsored && <span className="rounded-full bg-action/80 px-2.5 py-1 text-[11px] font-bold text-white">Sponsored</span>}
         </div>
         <SaveButton eventId={event.id} className="absolute right-2.5 top-2.5" />
+        <span className="event-card-invitation" aria-hidden>Find your way in <ArrowUpRight size={15} /></span>
       </div>
       <div className="mt-2.5 space-y-0.5">
         <p className="flex items-center gap-1.5 text-[13px] font-medium text-ink-3">
@@ -70,7 +71,7 @@ export function FeaturedCard({ card }: { card: Card }) {
   const { event, org } = card;
   const extra = event.lineup.length - 4;
   return (
-    <Link to={`/e/${event.slug}`} className="group flex w-[86vw] max-w-[720px] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border border-line bg-surface sm:w-[680px] sm:flex-row" data-testid="featured-card">
+    <Link to={`/e/${event.slug}`} className="featured-card group flex w-[86vw] max-w-[720px] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border border-line bg-surface sm:w-[680px] sm:flex-row" data-testid="featured-card">
       <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden sm:w-[260px]">
         <PosterArt poster={event.poster} title={event.title} className="transition duration-500 group-hover:scale-[1.03]" />
         <SaveButton eventId={event.id} className="absolute right-3 top-3" />

@@ -15,8 +15,8 @@ function savedTheme(): Theme | null {
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle('dark', theme === 'dark');
-  document.documentElement.style.backgroundColor = theme === 'dark' ? '#121216' : '#FFFFFF';
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#121216' : '#FFFFFF');
+  document.documentElement.style.backgroundColor = theme === 'dark' ? '#121216' : '#FAF8F5';
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#121216' : '#FAF8F5');
 }
 
 export const useTheme = create<{ theme: Theme; toggle: () => void }>((set, get) => ({

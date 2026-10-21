@@ -23,9 +23,9 @@ export default {
         bad: '#DC2626',
       },
       fontFamily: {
-        sans: ['Inter', '"Noto Sans Bengali"', 'system-ui', 'sans-serif'],
-        display: ['"Inter Tight"', 'Inter', '"Noto Sans Bengali"', 'system-ui', 'sans-serif'],
-        poster: ['Anton', '"Inter Tight"', 'Impact', 'sans-serif'],
+        sans: ['Inter Variable', '"Noto Sans Bengali"', 'system-ui', 'sans-serif'],
+        display: ['Inter Variable', '"Noto Sans Bengali"', 'system-ui', 'sans-serif'],
+        poster: ['Anton', 'Impact', 'sans-serif'],
       },
       borderRadius: { '4xl': '2rem' },
       boxShadow: { card: '0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06)' },

@@ -5,6 +5,7 @@ import { Toaster } from '@/components/Toaster';
 import { RouteErrorBoundary } from '@/components/ErrorBoundary';
 import { PageSpinner } from '@/components/ui';
 import Home from '@/pages/Home';
+import { PageMeta } from '@/components/PageMeta';
 import Explore from '@/pages/Explore';
 import EventPage from '@/pages/Event';
 import Checkout from '@/pages/Checkout';
@@ -29,6 +30,7 @@ const Scanner = lazy(() => import('@/pages/Scanner'));
 export default function App() {
   return (
     <HashRouter>
+      <PageMeta />
       <Toaster />
       <RouteErrorBoundary>
         <Suspense fallback={<PageSpinner />}>

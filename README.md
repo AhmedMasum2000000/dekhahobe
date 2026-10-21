@@ -63,6 +63,18 @@ npm run e2e                          # 32 browser checks across every flow (Play
 scripts/test-sql.sh                  # applies the Supabase migration to a local Postgres 16 and tests its functions
 ```
 
+## Experience and accessibility
+
+The homepage uses the original artwork, editorial typography, scene shortcuts and locally stored recently viewed events. The animation control pauses decorative motion and remembers that choice; the device's reduced-motion preference always takes precedence. Reveal content stays readable with motion disabled. Inter, Anton and Noto Sans Bengali are self-hosted through pinned Fontsource packages.
+
+With the preview server running, check the new interactions, responsive layouts and metadata:
+
+```bash
+CHROMIUM_PATH=/usr/bin/chromium npm run test:experience
+```
+
+SEO foundations include homepage metadata, canonical URL, organization/website structured data, a readable no-JavaScript introduction and `public/sitemap.xml`. The sitemap lists the real homepage only. Event content is fictional demo data and is marked `noindex`; separate indexable event pages require a future move from hash routing to real server-served paths. Payments remain simulated and the existing browser-only demo architecture is unchanged.
+
 ## Deploy
 
 `.github/workflows/pages.yml` builds and deploys to GitHub Pages on every push. Enable it once in the

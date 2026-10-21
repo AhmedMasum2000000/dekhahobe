@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Instagram, Megaphone, Rocket, Sparkles, Star, Users, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Footprints, Headphones, Instagram, Laugh, MapPin, Megaphone, Music2, Palette, Rocket, Sparkles, Users, Wallet } from 'lucide-react';
 import { api, type BpopEvent } from '@/api';
 import { useApi } from '@/hooks/useApi';
 import { PosterArt } from '@/components/PosterArt';
@@ -8,6 +8,9 @@ import { EventCard } from '@/components/EventCard';
 import { Avatar, AvatarStack, PopStar, Sparkle, Verified } from '@/components/ui';
 import { cardRange, dayLabel, tk } from '@/lib/util';
 import heroArt from '@/assets/dekha-hobe-hero.webp';
+import { MotionToggle } from '@/components/ExperienceEffects';
+import { RecentlyViewed } from '@/components/RecentlyViewed';
+import { useMotion } from '@/store/motion';
 
 export const INSTAGRAM_URL = 'https://www.instagram.com/bpop.tags/';
 
@@ -28,15 +31,9 @@ function PosterRow({ events, reverse, paused }: { events: BpopEvent[]; reverse?:
 
 function StoreButtons() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-action px-4 text-white">
-        <svg viewBox="0 0 24 24" className="h-5 w-5 fill-white" aria-hidden><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9C6.1 7 4.6 8 3.7 9.5c-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.9-1.1-2.9-4.3zM14 5.3c.7-.8 1.2-2 1-3.2-1 .1-2.2.7-3 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.3-.6 3-1.4z" /></svg>
-        <span className="text-left leading-none"><span className="block text-[10px] opacity-75">Download on the</span><span className="text-[15px] font-semibold">App Store</span></span>
-      </Link>
-      <Link to="/app" className="flex h-12 items-center gap-2 rounded-xl bg-action px-4 text-white">
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden><path fill="#fff" d="M4 2.8v18.4c0 .4.4.6.7.4l10.6-9.2c.2-.2.2-.6 0-.8L4.7 2.4c-.3-.2-.7 0-.7.4z" /><path fill="#E6007E" d="M15.3 12.4 18 15l2.8-1.6c.6-.4.6-1.2 0-1.6L18 10.2z" /></svg>
-        <span className="text-left leading-none"><span className="block text-[10px] opacity-75">Get it on</span><span className="text-[15px] font-semibold">Google Play</span></span>
-      </Link>
+    <div className="flex flex-wrap justify-center gap-2">
+      <Link to="/explore" className="btn btn-brand btn-lg">Explore events <ArrowUpRight size={18} aria-hidden /></Link>
+      <Link to="/saved" className="btn btn-outline btn-lg">Save your favorites</Link>
     </div>
   );
 }
@@ -87,7 +84,9 @@ function useOnScreen<T extends Element>() {
 
 export default function Home() {
   const { data } = useApi(() => api.homeFeed(), []);
+  const { paused, reduced } = useMotion();
   const [marqueeRef, marqueeOn] = useOnScreen<HTMLDivElement>();
+  const [artRef, artOn] = useOnScreen<HTMLDivElement>();
   const posters = data?.posters ?? [];
   const third = Math.ceil(posters.length / 3);
   const rows = [posters.slice(0, third), posters.slice(third, third * 2), posters.slice(third * 2)].map((r) => (r.length ? r : posters));
@@ -95,43 +94,53 @@ export default function Home() {
 
   return (
     <div>
-      {/* hero */}
-      <section className="relative overflow-hidden pb-10 pt-8 sm:pt-12">
-        <div className="halftone halftone-fade pointer-events-none absolute -left-24 -top-24 h-80 w-80 text-brand/40" aria-hidden />
-        <div className="container-x relative mb-10 grid items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-4">
-          <div className="min-w-0 text-center lg:text-left">
-            <div className="flex justify-center lg:justify-start"><RadarStamp className="text-brand-dark" /></div>
-            <h1 className="headline mx-auto mt-5 max-w-4xl text-[58px] sm:text-[104px] lg:mx-0 lg:text-[96px] xl:text-[112px]" data-testid="hero-title">
-              You are on <span className="relative inline-block text-brand">our radar<Sparkle className="absolute -right-6 -top-2 h-6 w-6 animate-twinkle text-brand sm:-right-9 sm:h-9 sm:w-9" /></span>
-            </h1>
-            <p className="mx-auto mt-5 max-w-xl text-[17px] text-ink-2 lg:mx-0">
-              Dekha Hobe is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
-            </p>
-            <div className="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start">
-              <Link to="/explore" className="btn btn-brand btn-lg">Explore events</Link>
-              <Link to="/create" className="btn btn-outline btn-lg">Host an event</Link>
-            </div>
-          </div>
-          <figure className="relative mx-auto w-full max-w-[300px] sm:max-w-[360px] lg:max-w-[440px]" data-testid="hero-art">
-            <div className="pointer-events-none absolute inset-x-[6%] bottom-[4%] top-[10%] bg-[radial-gradient(closest-side,rgba(250,2,163,0.18),transparent)]" aria-hidden />
-            <div className="halftone halftone-fade pointer-events-none absolute -inset-8 text-brand/35" aria-hidden />
-            <img
-              src={heroArt}
-              width={960}
-              height={1091}
-              alt="Dekha Hobe artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
-              className="relative h-auto w-full select-none"
-              draggable={false}
-              decoding="async"
-            />
-            <Sparkle className="absolute right-3 top-8 h-8 w-8 animate-twinkle text-brand" />
-          </figure>
+      {/* The original artwork stays intact; the surrounding layout becomes an editorial cover. */}
+      <section className="culture-hero" aria-labelledby="hero-heading">
+        <div className="container-x hero-edition">
+          <span><span className="edition-dot" />INDEPENDENT CULTURE. REAL CONNECTIONS.</span>
+          <span className="hidden sm:inline">DHAKA / CHATTOGRAM / BEYOND</span>
         </div>
+        <div className="container-x hero-cover">
+          <div className="hero-copy">
+            <div className="hero-kicker"><RadarStamp className="text-brand-dark" /><span>THE CITY IS YOURS.</span></div>
+            <h1 id="hero-heading" className="hero-headline" data-testid="hero-title">
+              Find your<br /><span className="hero-word">kind of</span><br /><span className="hero-alive">alive.<ArrowUpRight aria-hidden /></span>
+            </h1>
+            <p className="hero-description">Small gigs. Big feelings. Art that stays with you. Discover music, nightlife and unexpected plans across Bangladesh — and the people who make them worth going to.</p>
+            <div className="hero-actions">
+              <Link to="/explore" className="btn btn-brand btn-lg hero-primary" data-testid="hero-explore">Find your next plan <ArrowUpRight size={20} aria-hidden /></Link>
+              <Link to="/create" className="hero-host-link">Make something happen <ArrowRight size={16} aria-hidden /></Link>
+            </div>
+            <p className="hero-footnote"><Check size={14} aria-hidden />Browse first. Find your people. See you there.</p>
+          </div>
+          <div className="hero-art-stage" ref={artRef} data-in-view={artOn} onPointerMove={(event) => {
+            if (paused || reduced || event.pointerType !== 'mouse') return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            event.currentTarget.style.setProperty('--art-x', `${((event.clientX - rect.left) / rect.width - .5) * 12}px`);
+            event.currentTarget.style.setProperty('--art-y', `${((event.clientY - rect.top) / rect.height - .5) * 10}px`);
+          }} onPointerLeave={(event) => {
+            event.currentTarget.style.setProperty('--art-x', '0px');
+            event.currentTarget.style.setProperty('--art-y', '0px');
+          }}>
+            <span className="hero-orbit" aria-hidden />
+            <span className="hero-art-label">GOOD ART. / BETTER COMPANY.</span>
+            <figure className="hero-art-figure" data-testid="hero-art">
+              <img src={heroArt} width={960} height={1091} alt="Original Bpop Tags artwork: a Mughal-style woman in sunglasses with a parrot and a lotus" className="hero-artwork" draggable={false} fetchPriority="high" decoding="async" />
+            </figure>
+            <div className="hero-sticker"><Sparkles size={21} aria-hidden /><span>OFFLINE<br />LOOKS GOOD<br />ON YOU.</span></div>
+            <Sparkle className="hero-sparkle hero-sparkle-one" />
+            <Sparkle className="hero-sparkle hero-sparkle-two" />
+            {f && <Link className="hero-radar-card" to={`/e/${f.event.slug}`}>
+              <span className="hero-radar-art"><PosterArt poster={f.event.poster} title={f.event.title} showText={false} /></span>
+              <span className="min-w-0"><span className="hero-radar-eyebrow">A LITTLE SOMETHING FOR YOUR RADAR</span><span className="mt-1 block line-clamp-2 text-sm font-bold">{f.event.title}</span><span className="mt-1 flex items-center gap-1 text-xs text-ink-3"><MapPin size={12} />{f.event.venue.city}</span></span>
+              <ArrowUpRight className="shrink-0" size={20} aria-hidden />
+            </Link>}
+          </div>
+        </div>
+        <div className="container-x hero-bottom-note"><span>SCROLL FOR SOMETHING WORTH GOING OUT FOR <ArrowRight size={13} aria-hidden /></span><MotionToggle /></div>
         {posters.length > 0 && (
           <div ref={marqueeRef} className="relative space-y-3">
-            <PosterRow events={rows[0]!} paused={!marqueeOn} />
-            <PosterRow events={rows[1]!} reverse paused={!marqueeOn} />
-            <PosterRow events={rows[2]!} paused={!marqueeOn} />
+            <PosterRow events={rows[0]!} paused={!marqueeOn || paused || reduced} />
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[10%] bg-gradient-to-r from-surface to-transparent" aria-hidden />
             <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[10%] bg-gradient-to-l from-surface to-transparent" aria-hidden />
           </div>
@@ -139,8 +148,22 @@ export default function Home() {
       </section>
 
       {/* live featured event */}
+      <section className="scene-picker container-x" aria-labelledby="scene-heading" data-reveal>
+        <div className="scene-heading"><span className="editorial-index">01 / FOLLOW THE FEELING</span><h2 id="scene-heading">What’s your scene?</h2><p>Follow a feeling. Find a plan.</p></div>
+        <div className="scene-links">
+          {[
+            { title: 'After dark', note: 'Find your frequency', category: 'Nightlife', icon: Headphones, color: 'pink' },
+            { title: 'Live & loud', note: 'Be there for the encore', category: 'Concerts', icon: Music2, color: 'violet' },
+            { title: 'Art & oddities', note: 'A different point of view', category: 'Arts & Fashion', icon: Palette, color: 'orange' },
+            { title: 'A good laugh', note: 'Best shared with friends', category: 'Comedy', icon: Laugh, color: 'green' },
+            { title: 'Out of office', note: 'Move. Meet. Repeat.', category: 'Fitness', icon: Footprints, color: 'blue' },
+          ].map(({title,note,category,icon:Icon,color}) => <Link key={category} className={`scene-link scene-${color}`} to={`/explore?category=${encodeURIComponent(category)}`} data-testid="scene-link"><span className="scene-icon"><Icon size={23} strokeWidth={1.6} aria-hidden /></span><span><strong>{title}</strong><small>{note}</small></span><ArrowUpRight className="scene-arrow" size={19} aria-hidden /></Link>)}
+        </div>
+      </section>
+      <RecentlyViewed />
+
       {f && (
-        <section className="container-x">
+        <section data-reveal className="container-x mt-12">
           <div className="card flex flex-col items-start gap-5 p-5 sm:flex-row sm:items-center sm:p-6">
             <Link to={`/e/${f.event.slug}`} className="block aspect-[4/5] w-24 shrink-0 overflow-hidden rounded-2xl">
               <PosterArt poster={f.event.poster} title={f.event.title} showText={false} />
@@ -164,7 +187,7 @@ export default function Home() {
 
       {/* off the grid · on our radar */}
       {data && data.radar.length > 0 && (
-        <section className="container-x mt-20" data-testid="radar">
+        <section data-reveal className="container-x mt-20" data-testid="radar">
           <SectionHead
             sub={<RadarStamp />}
             action={<Link to="/explore" className="btn btn-outline btn-md shrink-0">View all <ArrowRight className="h-4 w-4" /></Link>}
@@ -182,7 +205,7 @@ export default function Home() {
 
       {/* here's what you missed last week */}
       {data && data.recap.length > 0 && (
-        <section className="relative mt-24 overflow-hidden border-y border-line bg-brand-light py-16" data-testid="recap">
+        <section data-reveal className="relative mt-24 overflow-hidden border-y border-line bg-brand-light py-16" data-testid="recap">
           <div className="halftone halftone-fade pointer-events-none absolute -right-16 -top-10 h-72 w-72 text-brand/25" aria-hidden />
           <div className="container-x relative">
             <SectionHead sub={<span className="tag-pop">Recap</span>}>
@@ -205,7 +228,7 @@ export default function Home() {
 
       {/* we found art */}
       {data && data.art.length > 0 && (
-        <section className="container-x mt-24" data-testid="found-art">
+        <section data-reveal className="container-x mt-24" data-testid="found-art">
           <div className="grid items-start gap-8 lg:grid-cols-[1fr_2fr]">
             <div className="relative">
               <h2 className="headline text-[84px] leading-[0.85] sm:text-[120px]">
@@ -224,7 +247,7 @@ export default function Home() {
       )}
 
       {/* app section */}
-      <section className="container-x mt-24">
+      <section data-reveal className="container-x mt-24">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex justify-center gap-4 lg:justify-start">
             <PhoneMock tilt={-4}>
@@ -269,18 +292,15 @@ export default function Home() {
       </section>
 
       {/* testimonial */}
-      <section className="container-x mt-24 text-center">
-        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">“Whenever I’m bored on a Thursday I open Dekha Hobe, find something new and send it straight to the group chat.”</p>
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <span className="font-display text-xl font-extrabold">4.9</span>
-          <span className="flex">{Array.from({ length: 5 }, (_, i) => <Star key={i} className="h-5 w-5 fill-brand text-brand" />)}</span>
-        </div>
+      <section data-reveal className="container-x mt-24 text-center">
+        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">From “what’s the plan?” to “see you there.”</p>
+        <p className="mx-auto mt-4 max-w-xl text-ink-3">Save the events you love, bring your friends and keep your tickets close. Your next good memory starts with a plan.</p>
         <div className="mt-6 flex justify-center"><StoreButtons /></div>
       </section>
 
       {/* culture & community */}
       {data?.spotlight && (
-        <section className="relative mt-24 overflow-hidden bg-mist py-16">
+        <section data-reveal className="relative mt-24 overflow-hidden bg-mist py-16">
           <div className="container-x grid items-center gap-10 lg:grid-cols-2">
             <div>
               <h2 className="headline text-5xl sm:text-6xl">Driving culture &amp; community</h2>
@@ -308,11 +328,11 @@ export default function Home() {
       )}
 
       {/* organizer pitch */}
-      <section className="container-x mt-24">
+      <section data-reveal className="container-x mt-24">
         <div className="text-center">
           <h2 className="headline mx-auto max-w-3xl text-5xl sm:text-7xl">Throw a party. Build a community. Find your people.</h2>
           <p className="mx-auto mt-4 max-w-xl text-ink-2">Everything you need to create, sell out and scale your events — in one Organizer Dashboard.</p>
-          <Link to="/platform" className="btn btn-primary btn-lg mt-6">Dekha Hobe for Organizers</Link>
+          <Link to="/create" className="btn btn-primary btn-lg mt-6">Create your first event <ArrowUpRight size={18} /></Link>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {posters.slice(5, 8).map((e, i) => (
@@ -339,7 +359,7 @@ export default function Home() {
       </section>
 
       {/* organizer quote */}
-      <section className="container-x mt-24">
+      <section data-reveal className="container-x mt-24">
         <div className="grid overflow-hidden rounded-4xl bg-action text-white md:grid-cols-2">
           <div className="p-8 sm:p-12">
             <p className="font-display text-3xl font-bold leading-snug">“Dekha Hobe let us take one Friday run around the lake and turn it into a city-wide community.”</p>
@@ -356,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* magazine */}
-      <section className="container-x mt-24">
+      <section data-reveal className="container-x mt-24">
         <SectionHead
           sub={<span className="tag-pop">Dekha Hobe Magazine</span>}
           action={<a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-outline btn-md shrink-0"><Instagram className="h-4 w-4" />Instagram</a>}
@@ -381,8 +401,20 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="container-x mt-24" data-reveal>
+        <div className="faq-editorial">
+          <div><span className="editorial-index">A FEW THINGS BEFORE YOU GO</span><h2 className="headline mt-4 text-4xl sm:text-5xl">Good questions.<br /><span className="text-brand">Easy plans.</span></h2></div>
+          <div>
+            <details><summary>Where can I find events in Dhaka and beyond?</summary><p>Start with <Link to="/explore">Explore events</Link>. Filter by city, date and the kind of experience you love, from live music and nightlife to art, comedy and community meetups across Bangladesh.</p></details>
+            <details><summary>Are there free events and community meetups?</summary><p>Absolutely. Use the <Link to="/explore?price=free">Free events filter</Link> to discover no-cost plans. Check each event page for its location, schedule and RSVP options.</p></details>
+            <details><summary>How do I bring my own community together?</summary><p><Link to="/create">Create an event</Link> to start with your idea, then add the details, artwork and ticket options. Explore our <Link to="/platform">organizer tools</Link> for guest lists, check-in and more.</p></details>
+            <details><summary>Can I book real tickets here?</summary><p>This is the Dekha Hobe demo experience. You can try the ticketing flows, but payments and SMS are simulated and no money is charged. Your demo data stays in your browser.</p></details>
+          </div>
+        </div>
+      </section>
+
       {/* CTA tiles */}
-      <section className="container-x mt-24 grid gap-4 sm:grid-cols-2">
+      <section data-reveal className="container-x mt-24 grid gap-4 sm:grid-cols-2">
         <Link to="/create" className="group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-4xl p-7 text-white">
           <div className="absolute inset-0"><PosterArt poster={{ seed: 991, style: 'zine', hues: [320, 0] }} title="" showText={false} className="transition duration-500 group-hover:scale-105" /></div>
           <div className="relative"><p className="text-sm font-semibold opacity-80"><Users className="mb-1 inline h-4 w-4" /> Host an event</p><p className="headline text-4xl">Create your world</p></div>

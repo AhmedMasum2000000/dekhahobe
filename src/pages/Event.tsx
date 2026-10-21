@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CalendarPlus, Clock, Copy, Instagram, Lock, Mail, MapPin, MessageCircle, Share2, Sparkles, Ticket as TicketIcon } from 'lucide-react';
 import { api, type BpopEvent, type TicketType } from '@/api';
 import { useApi } from '@/hooks/useApi';
+import { useDiscovery } from '@/store/discovery';
+import { setPageMeta } from '@/components/PageMeta';
 import { PosterArt } from '@/components/PosterArt';
 import { SaveButton } from '@/components/EventCard';
 import { Avatar, AvatarStack, Badge, Countdown, Empty, Modal, PageSpinner, RichText, Stepper, Verified, ViewMore } from '@/components/ui';
@@ -312,6 +314,11 @@ export default function EventPage() {
   const tracked = useRef('');
 
   const ev = data?.card.event;
+  useEffect(() => {
+    if (!ev) return;
+    try { if (useDiscovery.getState().recent[0] !== ev.slug) useDiscovery.getState().remember(ev.slug); } catch { /* Browsing history is optional. */ }
+    setPageMeta(`${ev.title} | Dekha Hobe`, `${ev.title} in ${ev.venue.city}. Explore the lineup, venue and ticket options on Dekha Hobe. Demo event.`);
+  }, [ev]);
   useEffect(() => {
     if (!ev || tracked.current === ev.id) return;
     tracked.current = ev.id;

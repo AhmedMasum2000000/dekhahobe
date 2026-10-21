@@ -61,8 +61,8 @@ export default function Explore() {
 
   return (
     <div className="container-x pt-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="headline text-5xl sm:text-7xl">Discover <span className="text-brand">events</span></h1>
+      <div className="explore-intro flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div><p className="editorial-index mb-3">THE GOOD KIND OF GOING OUT</p><h1 className="headline text-5xl sm:text-7xl">Discover <span className="text-brand">events</span></h1><p className="mt-3 max-w-lg text-sm leading-relaxed text-ink-3">Find a sound, a scene, a reason to get out. Independent culture, all across Bangladesh.</p></div>
         <div className="relative w-full sm:w-80">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-4" />
           <input
