@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi';
 import { Avatar, Logo } from './ui';
 import { RouteErrorBoundary } from './ErrorBoundary';
 import { ThemeToggle } from './ThemeToggle';
+import bpopLogo from '@/assets/bpop-logo.png';
 
 const NAV = [
   { to: '/', label: 'Home', end: true },
@@ -171,6 +172,10 @@ export function Footer() {
           </div>
         </div>
         <p className="mt-12 text-xs text-ink-4">© {new Date().getFullYear()} Dekha Hobe. Demo build — payments are simulated and data is stored in your browser.</p>
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 border-t border-line pt-8 text-center sm:flex-row sm:gap-4">
+          <p className="text-sm font-medium text-ink-2">A concern of Bpop Tags</p>
+          <img src={bpopLogo} alt="Bpop Tags" className="h-9 w-auto max-w-full" loading="lazy" />
+        </div>
       </div>
     </footer>
   );
