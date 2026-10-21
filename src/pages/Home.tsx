@@ -7,7 +7,7 @@ import { PosterArt } from '@/components/PosterArt';
 import { EventCard } from '@/components/EventCard';
 import { Avatar, AvatarStack, PopStar, Sparkle, Verified } from '@/components/ui';
 import { cardRange, dayLabel, tk } from '@/lib/util';
-import heroArt from '@/assets/bpop-hero-art.webp';
+import heroArt from '@/assets/dekha-hobe-hero.webp';
 
 export const INSTAGRAM_URL = 'https://www.instagram.com/bpop.tags/';
 
@@ -50,7 +50,7 @@ function PhoneMock({ children, tilt = 0 }: { children: React.ReactNode; tilt?: n
   );
 }
 
-/** Small stamp used on B-POP posts: "OFF THE GRID / ON OUR RADAR". */
+/** Small stamp used on Dekha Hobe posts: "OFF THE GRID / ON OUR RADAR". */
 function RadarStamp({ className = 'text-ink' }: { className?: string }) {
   return (
     <span className={`stamp ${className}`}>
@@ -105,7 +105,7 @@ export default function Home() {
               You are on <span className="relative inline-block text-brand">our radar<Sparkle className="absolute -right-6 -top-2 h-6 w-6 animate-twinkle text-brand sm:-right-9 sm:h-9 sm:w-9" /></span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-[17px] text-ink-2 lg:mx-0">
-              Bangla Pop Tags is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
+              Dekha Hobe is curating pop-culture &amp; the underground scene. Find the gigs, raves, DJ workshops, art shows and run clubs the media won’t tell you about — then grab your ticket right here.
             </p>
             <div className="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start">
               <Link to="/explore" className="btn btn-brand btn-lg">Explore events</Link>
@@ -117,9 +117,9 @@ export default function Home() {
             <div className="halftone halftone-fade pointer-events-none absolute -inset-8 text-brand/35" aria-hidden />
             <img
               src={heroArt}
-              width={960}
-              height={1091}
-              alt="B-POP TAGS artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
+              width={1176}
+              height={1337}
+              alt="Dekha Hobe artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
               className="relative h-auto w-full select-none"
               draggable={false}
               decoding="async"
@@ -211,7 +211,7 @@ export default function Home() {
               <h2 className="headline text-[84px] leading-[0.85] sm:text-[120px]">
                 <PopStar className="mr-1 inline-block h-[0.6em] w-[0.6em] -translate-y-[0.3em] -rotate-12" />We found <span className="outline-pop">art</span>
               </h2>
-              <p className="mt-5 max-w-sm text-ink-2">Exhibitions, design markets, zines and the artists shaping Bangladesh’s visual culture — spotted by the B-POP team.</p>
+              <p className="mt-5 max-w-sm text-ink-2">Exhibitions, design markets, zines and the artists shaping Bangladesh’s visual culture — spotted by the Dekha Hobe team.</p>
               <Link to={`/explore?category=${encodeURIComponent('Arts & Fashion')}`} className="btn btn-primary btn-lg mt-6">Explore arts &amp; fashion</Link>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -270,7 +270,7 @@ export default function Home() {
 
       {/* testimonial */}
       <section className="container-x mt-24 text-center">
-        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">“Whenever I’m bored on a Thursday I open B-POP, find something new and send it straight to the group chat.”</p>
+        <p className="mx-auto max-w-3xl font-display text-2xl font-bold leading-snug sm:text-4xl">“Whenever I’m bored on a Thursday I open Dekha Hobe, find something new and send it straight to the group chat.”</p>
         <div className="mt-6 flex items-center justify-center gap-2">
           <span className="font-display text-xl font-extrabold">4.9</span>
           <span className="flex">{Array.from({ length: 5 }, (_, i) => <Star key={i} className="h-5 w-5 fill-brand text-brand" />)}</span>
@@ -285,7 +285,7 @@ export default function Home() {
             <div>
               <h2 className="headline text-5xl sm:text-6xl">Driving culture &amp; community</h2>
               <p className="mt-4 max-w-md text-ink-2">We partner with the collectives, venues and brands that keep Bangladesh’s culture alive.</p>
-              <Link to="/platform" className="btn btn-primary btn-lg mt-6">B-POP for Organizers <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/platform" className="btn btn-primary btn-lg mt-6">Dekha Hobe for Organizers <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <Link to={`/g/${data.spotlight.org.slug}`} className="card flex items-center gap-4 p-4">
               <div className="aspect-[4/5] w-28 shrink-0 overflow-hidden rounded-2xl"><PosterArt poster={data.spotlight.event.poster} title={data.spotlight.event.title} showText={false} /></div>
@@ -312,7 +312,7 @@ export default function Home() {
         <div className="text-center">
           <h2 className="headline mx-auto max-w-3xl text-5xl sm:text-7xl">Throw a party. Build a community. Find your people.</h2>
           <p className="mx-auto mt-4 max-w-xl text-ink-2">Everything you need to create, sell out and scale your events — in one Organizer Dashboard.</p>
-          <Link to="/platform" className="btn btn-primary btn-lg mt-6">B-POP for Organizers</Link>
+          <Link to="/platform" className="btn btn-primary btn-lg mt-6">Dekha Hobe for Organizers</Link>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {posters.slice(5, 8).map((e, i) => (
@@ -326,7 +326,7 @@ export default function Home() {
           {[
             { n: '01', k: 'Create', t: 'Bring your idea to life', b: 'Design an event page as unique as your event — tiers, lineups, guest lists and door sales.', icon: <Sparkles className="h-5 w-5" /> },
             { n: '02', k: 'Earn', t: 'We’ll help you find your crowd', b: 'Get discovered in the Explore feed, turn buyers into promoters with Kickbacks and text your audience for free.', icon: <Megaphone className="h-5 w-5" /> },
-            { n: '03', k: 'Scale', t: 'Turn your community into culture', b: 'Make data-backed decisions with real-time insights, and ask B-POP AI anything about your events.', icon: <Rocket className="h-5 w-5" /> },
+            { n: '03', k: 'Scale', t: 'Turn your community into culture', b: 'Make data-backed decisions with real-time insights, and ask Dekha Hobe AI anything about your events.', icon: <Rocket className="h-5 w-5" /> },
           ].map((s) => (
             <div key={s.n}>
               <p className="flex items-center gap-2 text-sm font-bold text-brand-dark">{s.icon}{s.n}. {s.k}</p>
@@ -342,7 +342,7 @@ export default function Home() {
       <section className="container-x mt-24">
         <div className="grid overflow-hidden rounded-4xl bg-action text-white md:grid-cols-2">
           <div className="p-8 sm:p-12">
-            <p className="font-display text-3xl font-bold leading-snug">“B-POP let us take one Friday run around the lake and turn it into a city-wide community.”</p>
+            <p className="font-display text-3xl font-bold leading-snug">“Dekha Hobe let us take one Friday run around the lake and turn it into a city-wide community.”</p>
             <p className="mt-6 font-semibold">Gulshan Run Club</p>
             <p className="text-sm text-white/60">Free community runs every Friday & Saturday</p>
             <Link to="/g/gulshan-run-club" className="btn btn-lg mt-6 bg-surface text-ink hover:bg-surface/90">View organizer</Link>
@@ -358,8 +358,8 @@ export default function Home() {
       {/* magazine */}
       <section className="container-x mt-24">
         <SectionHead
-          sub={<span className="tag-pop">B-POP Magazine</span>}
-          action={<a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-outline btn-md shrink-0"><Instagram className="h-4 w-4" />@bpop.tags</a>}
+          sub={<span className="tag-pop">Dekha Hobe Magazine</span>}
+          action={<a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-outline btn-md shrink-0"><Instagram className="h-4 w-4" />Instagram</a>}
         >
           Stories from the scene
         </SectionHead>

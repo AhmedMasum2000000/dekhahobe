@@ -45,7 +45,7 @@ function Gateway({ order, method, onPaid, onBack }: { order: Order; method: (typ
   const sendOtp = () => {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     setSent(code);
-    window.dispatchEvent(new CustomEvent('bpop:sms', { detail: { to: normalizePhone(acct) ?? acct, body: `${method.name}: your verification code is ${code}. Payment ${tk(order.total)} to B-POP TAGS.`, otp: true } }));
+    window.dispatchEvent(new CustomEvent('bpop:sms', { detail: { to: normalizePhone(acct) ?? acct, body: `${method.name}: your verification code is ${code}. Payment ${tk(order.total)} to Dekha Hobe.`, otp: true } }));
   };
 
   const submitAccount = () => {
@@ -67,7 +67,7 @@ function Gateway({ order, method, onPaid, onBack }: { order: Order; method: (typ
     <div className="overflow-hidden rounded-3xl border border-line">
       <div className="flex items-center justify-between px-5 py-4 text-white" style={{ background: method.color }}>
         <p className="font-display text-xl font-extrabold">{method.name}</p>
-        <p className="text-sm opacity-90">Merchant: B-POP TAGS · {tk(order.total)}</p>
+        <p className="text-sm opacity-90">Merchant: Dekha Hobe · {tk(order.total)}</p>
       </div>
       <div className="space-y-4 p-5">
         {step === 'account' && (

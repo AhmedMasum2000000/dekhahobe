@@ -543,7 +543,7 @@ export function buildSeed(): DB {
     waitlist,
     kickbackLinks,
     messages,
-    smsBlasts: [{ id: id('sms'), orgId: orgs[0]!.id, audience: 'followers', body: 'NEON MONSOON is 70% sold — last GA tickets at bpop.tags/e/neon-monsoon-warehouse-rave', recipients: 312, createdAt: iso(new Date(now - 3 * 86400e3)) }],
+    smsBlasts: [{ id: id('sms'), orgId: orgs[0]!.id, audience: 'followers', body: 'NEON MONSOON is 70% sold — last GA tickets at ahmedmasum2000000.github.io/dekhahobe/#/e/neon-monsoon-warehouse-rave', recipients: 312, createdAt: iso(new Date(now - 3 * 86400e3)) }],
     payouts,
     notifications,
     outbox: [],

@@ -203,7 +203,7 @@ function TicketDetailInner() {
               </label>
             ))}
           </div>
-          <Field label="Recipient’s mobile number" hint="If they’re new to B-POP TAGS, they’ll get a text to sign up and accept.">
+          <Field label="Recipient’s mobile number" hint="If they’re new to Dekha Hobe, they’ll get a text to sign up and accept.">
             <input className="input" inputMode="tel" placeholder="01XXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} data-testid="transfer-phone" />
           </Field>
           <p className="rounded-xl bg-mist p-3 text-[13px] text-ink-2">Heads up: transferred tickets are non-refundable, and your QR code for them will stop working once accepted.</p>

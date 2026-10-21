@@ -496,7 +496,7 @@ export default function EventPage() {
               <div>
                 <p className="font-bold">Get the app for more features</p>
                 <p className="text-sm text-ink-3">Instant ticket access · Easy ticket transfers · Curated for you</p>
-                <Link to="/app" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">Download B-POP TAGS</Link>
+                <Link to="/app" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">Download Dekha Hobe</Link>
               </div>
             </section>
           </div>

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BadgeCheck, Loader2, Minus, Plus, X } from 'lucide-react';
 import { initials } from '@/lib/util';
-import logoUrl from '@/assets/bpop-logo.png';
+import logoLight from '@/assets/dekha-hobe-logo-light.jpg';
+import logoDark from '@/assets/dekha-hobe-logo-dark.jpg';
 
 const STAR_OUTER = 'M19.5 4.9 L34.4 23.3 L54.6 18.1 L43.6 34.8 L58.5 53.3 L36.8 45.2 L25.8 61.8 L23.3 40.1 L1.7 31.9 L21.9 26.6Z';
 const STAR_INNER = 'M25.6 22.4 L32.1 30.2 L40.8 28.1 L36.3 35.4 L42.5 43.4 L33.2 40.0 L28.3 47.1 L27.1 37.8 L17.9 34.1 L26.4 31.7Z';
 
-/** The Y2K star from the B-POP TAGS logo. */
+/** A decorative Y2K star used in event artwork. */
 export function PopStar({ className = 'h-8 w-8', fill = '#FED7EF' }: { className?: string; fill?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={`shrink-0 ${className}`} aria-hidden>
@@ -27,8 +28,9 @@ export function Sparkle({ className = 'h-4 w-4 text-brand' }: { className?: stri
 
 export function Logo({ className = '', mark = false }: { className?: string; mark?: boolean }) {
   return (
-    <span className={`inline-flex items-center ${className}`} aria-label="B-POP TAGS" role="img">
-      {mark ? <PopStar className="h-10 w-10" /> : <img src={logoUrl} alt="" className="h-8 w-auto select-none sm:h-9" draggable={false} />}
+    <span className={`brand-logo ${mark ? 'brand-logo-compact' : ''} ${className}`} aria-label="Dekha Hobe" role="img">
+      <img src={logoLight} alt="" className="brand-logo-light" draggable={false} />
+      <img src={logoDark} alt="" className="brand-logo-dark" draggable={false} />
     </span>
   );
 }

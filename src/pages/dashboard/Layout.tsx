@@ -60,10 +60,10 @@ function Onboarding() {
     <div className="flex min-h-screen items-center justify-center bg-mist px-4">
       <div className="card w-full max-w-md p-6">
         <Logo />
-        <h1 className="mt-6 text-3xl font-black tracking-tight">Start hosting on B-POP</h1>
+        <h1 className="mt-6 text-3xl font-black tracking-tight">Start hosting on Dekha Hobe</h1>
         <p className="mb-6 mt-2 text-ink-3">Create your organization to publish events, sell tickets and get paid.</p>
         <CreateOrgForm onDone={(o) => setOrg(o.id)} />
-        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-ink-3 underline">Back to B-POP</Link>
+        <Link to="/" className="mt-4 block text-center text-sm font-semibold text-ink-3 underline">Back to Dekha Hobe</Link>
       </div>
     </div>
   );
@@ -127,9 +127,9 @@ function Inner() {
       </aside>
 
       <header className="sticky top-0 z-30 border-b border-line bg-surface lg:hidden">
-        <div className="flex h-14 items-center justify-between px-4">
+        <div className="flex h-14 items-center justify-between gap-2 px-4">
           <Link to="/"><Logo mark /></Link>
-          <select className="h-9 max-w-[55%] truncate rounded-full border border-line bg-surface px-3 text-sm font-semibold" value={org.id} onChange={(e) => { setOrg(e.target.value); nav('/dashboard'); }} aria-label="Organization">
+          <select className="h-9 min-w-0 max-w-[55%] flex-1 truncate rounded-full border border-line bg-surface px-3 text-sm font-semibold" value={org.id} onChange={(e) => { setOrg(e.target.value); nav('/dashboard'); }} aria-label="Organization">
             {orgs!.map((o) => <option key={o.org.id} value={o.org.id}>{o.org.name}</option>)}
           </select>
           <ThemeToggle />

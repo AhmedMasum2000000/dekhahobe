@@ -132,7 +132,7 @@ function processWaitlist(db: DB, ev: BpopEvent, tt: TicketType) {
     free -= q;
     const u = userById(db, w.userId);
     notify(db, w.userId, { kind: 'waitlist', title: 'A ticket opened up for you 🎟️', body: `${q} × ${tt.name} for ${ev.title}. Claim within ${tt.waitlistResponseMins} min.`, link: `/e/${ev.slug}?offer=${w.id}` });
-    if (u) sms(db, u.phone, `B-POP TAGS: ${q} ticket(s) for ${ev.title} are yours if you claim within ${tt.waitlistResponseMins} min.`);
+    if (u) sms(db, u.phone, `Dekha Hobe: ${q} ticket(s) for ${ev.title} are yours if you claim within ${tt.waitlistResponseMins} min.`);
   }
   if (free > 0 && !entries.some((w) => w.status === 'waiting')) tt.heldForWaitlist -= free; // nobody left in line
 }
@@ -401,7 +401,7 @@ function finalizeOrder(db: DB, order: Order) {
   const tickets = issueTickets(db, order);
   const qty = tickets.length;
   notify(db, order.userId, { kind: 'order', title: `You’re going to ${ev.title} 🎉`, body: `${qty} ticket${qty > 1 ? 's' : ''} added to My tickets.`, link: `/orders/${order.id}` });
-  sms(db, order.buyer.phone, `B-POP TAGS: you're going to ${ev.title}! Order ${order.number}. Your QR tickets are in the app.`);
+  sms(db, order.buyer.phone, `Dekha Hobe: you're going to ${ev.title}! Order ${order.number}. Your QR tickets are in the app.`);
 }
 
 function nextOrderNumber(db: DB) {
@@ -546,7 +546,7 @@ export const localAdapter: ApiClient = {
       const p = normalizePhone(phone) ?? fail('Enter a valid Bangladeshi mobile number (e.g. 01711-000000).');
       const code = String(Math.floor(100000 + Math.random() * 900000));
       db.otps[p] = { code, expiresAt: new Date(now() + OTP_MINUTES * 60e3).toISOString() };
-      sms(db, p, `${code} is your B-POP TAGS verification code. It expires in ${OTP_MINUTES} minutes.`, { otp: true });
+      sms(db, p, `${code} is your Dekha Hobe verification code. It expires in ${OTP_MINUTES} minutes.`, { otp: true });
       return { sent: true as const };
     });
   },
@@ -1011,7 +1011,7 @@ export const localAdapter: ApiClient = {
       }
       const ev = findEvent(db, db.tickets.find((x) => x.id === ticketIds[0])!.eventId);
       if (recipient) notify(db, recipient.id, { kind: 'transfer', title: `${u.name} sent you ${ticketIds.length} ticket${ticketIds.length > 1 ? 's' : ''}`, body: `${ev.title} — accept to add them to your tickets.`, link: '/tickets?tab=transfers' });
-      sms(db, p, `B-POP TAGS: ${u.name} sent you ${ticketIds.length} ticket(s) to ${ev.title}. Log in with this number to accept.`);
+      sms(db, p, `Dekha Hobe: ${u.name} sent you ${ticketIds.length} ticket(s) to ${ev.title}. Log in with this number to accept.`);
     });
   },
   async cancelTransfer(ticketId) {
@@ -1195,7 +1195,7 @@ export const localAdapter: ApiClient = {
       const existing = db.kickbackLinks.find((l) => l.eventId === eventId && l.userId === u.id && l.offerId === offer.id);
       if (existing) return existing;
       let code = '';
-      do code = `${(u.username || 'BPOP').replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase()}${Math.floor(10 + Math.random() * 89)}`;
+      do code = `${(u.username || 'DEKHA').replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase()}${Math.floor(10 + Math.random() * 89)}`;
       while (db.kickbackLinks.some((l) => l.code === code));
       const link: KickbackLink = { code, eventId, offerId: offer.id, userId: u.id, visits: 0, createdAt: nowIso() };
       db.kickbackLinks.push(link);
@@ -1581,7 +1581,7 @@ export const localAdapter: ApiClient = {
       db.orders.push(order);
       const tickets = issueTickets(db, order, { comp: true });
       notify(db, user.id, { kind: 'order', title: `You’ve been comped to ${ev.title} 🎁`, body: `${input.qty} × ${tt.name} — no action needed.`, link: '/tickets' });
-      sms(db, user.phone, `B-POP TAGS: you've received ${input.qty} complimentary ticket(s) to ${ev.title}. They're in your account.`);
+      sms(db, user.phone, `Dekha Hobe: you've received ${input.qty} complimentary ticket(s) to ${ev.title}. They're in your account.`);
       return tickets;
     });
   },
@@ -1753,7 +1753,7 @@ export const localAdapter: ApiClient = {
       const u = ensureUserForPhone(db, phone);
       if (!offer.affiliateIds.includes(u.id)) offer.affiliateIds.push(u.id);
       notify(db, u.id, { kind: 'kickback', title: 'You’re invited to earn Kickbacks', body: `Share ${ev.title} and earn ${offer.kind === 'percent' ? `${offer.value}%` : tk(offer.value)} per ${offer.per}.`, link: `/e/${ev.slug}` });
-      sms(db, u.phone, `B-POP TAGS: you've been invited to promote ${ev.title} and earn Kickbacks.`);
+      sms(db, u.phone, `Dekha Hobe: you've been invited to promote ${ev.title} and earn Kickbacks.`);
     });
   },
   async smsAudienceSize(orgId, audience, eventId) {
@@ -1913,7 +1913,7 @@ function audienceFor(db: DB, orgId: ID, audience: 'all_attendees' | 'event_atten
   return db.users.filter((u) => ids.has(u.id) && u.smsOptIn && u.phone);
 }
 
-/** "Ask B-POP AI" — answers from the organization's own data, no external API. */
+/** "Ask Dekha Hobe AI" — answers from the organization's own data, no external API. */
 function answer(db: DB, orgId: ID, question: string): string {
   const q = question.toLowerCase();
   const evs = db.events.filter((e) => e.orgId === orgId);

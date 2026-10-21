@@ -1,13 +1,13 @@
-# B-POP TAGS
+# Dekha Hobe
 
-*Bangla Pop Tags — curating pop-culture & the underground scene.* ([@bpop.tags](https://www.instagram.com/bpop.tags/))
+*Dekha Hobe — curating pop-culture & the underground scene.* ([Instagram](https://www.instagram.com/bpop.tags/))
 
 A social event-discovery and ticketing platform for Bangladesh — discover events, buy tickets with
 bKash / Nagad / card, transfer tickets, join waitlists, earn Kickbacks, and run events end to end from an
 organizer dashboard with a door scanner.
 
-B-POP TAGS follows the page structure, user flows and feature set of Posh (see
-[`docs/REA-teardown.md`](docs/REA-teardown.md) for the reverse-engineering notes). It uses the **B-POP TAGS**
+Dekha Hobe follows the page structure, user flows and feature set of Posh (see
+[`docs/REA-teardown.md`](docs/REA-teardown.md) for the reverse-engineering notes). It uses the **Dekha Hobe**
 brand (logo, hot-pink palette, halftone/Y2K-star motifs and the Instagram content pillars: *Off the grid · On our
 radar*, *Here’s what you missed last week*, *We found art*), generated poster art and fictional Bangladeshi sample
 data — no Posh logos, photos or copy.
@@ -42,7 +42,7 @@ follow organizers and friends · saved events · notifications · privacy & bloc
 require approval, waitlist with release) · ticket groups · promo codes with share links · comps · private
 guest list · orders (approve / decline / refund, CSV) · attendees (search, check-in, CSV) · Kickback offers
 (one public offer per event, private affiliates) · tracking links and host sales · door scanner with PINs,
-door sales (cash / bKash) · SMS blasts · insights + "Ask Bpop AI" over your own data · balance and instant
+door sales (cash / bKash) · SMS blasts · insights + "Ask Dekha Hobe AI" over your own data · balance and instant
 payouts · team roles (owner / admin / host / doorperson) · duplicate / cancel events.
 
 ## Develop

@@ -48,7 +48,7 @@ class Boundary extends Component<{ children: ReactNode; resetKey: string }, Stat
   }
 
   componentDidCatch(error: Error) {
-    console.error('B-POP TAGS: page failed to render', error);
+    console.error('Dekha Hobe: page failed to render', error);
     if (CHUNK_ERROR.test(error.message) && reloadOnce()) this.setState({ reloading: true });
   }
 
@@ -60,7 +60,7 @@ class Boundary extends Component<{ children: ReactNode; resetKey: string }, Stat
         <PopStar className="h-14 w-14" />
         <h1 className="headline mt-4 text-5xl">{reloading ? 'Updating…' : 'This page hit a snag'}</h1>
         <p className="mt-3 max-w-md text-ink-3">
-          {reloading ? 'A newer version of B-POP TAGS is out. Loading it now.' : 'Reload to try again. Your tickets and account are safe.'}
+          {reloading ? 'A newer version of Dekha Hobe is out. Loading it now.' : 'Reload to try again. Your tickets and account are safe.'}
         </p>
         {!reloading && (
           <>

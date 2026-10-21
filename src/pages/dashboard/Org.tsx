@@ -64,7 +64,7 @@ export function Overview() {
           {s.pendingBalance > 0 && <p className="text-sm text-ink-3">{tk(s.pendingBalance)} pending approval</p>}
           <Link to="/dashboard/finance" className="btn btn-primary btn-md mt-4 w-full"><Zap className="h-4 w-4" />Instant payout</Link>
           <div className="mt-6 rounded-2xl bg-mist p-4">
-            <p className="flex items-center gap-2 text-sm font-bold"><Bot className="h-4 w-4" />Ask B-POP AI <Badge tone="brand">beta</Badge></p>
+            <p className="flex items-center gap-2 text-sm font-bold"><Bot className="h-4 w-4" />Ask Dekha Hobe AI <Badge tone="brand">beta</Badge></p>
             <p className="mt-1 text-[13px] text-ink-3">“Which event performed best?”</p>
             <Link to="/dashboard/insights" className="mt-2 inline-block text-sm font-semibold underline">Ask a question</Link>
           </div>
@@ -179,7 +179,7 @@ export function Insights() {
         </div>
       </div>
       <div className="card p-5">
-        <h2 className="flex items-center gap-2 font-bold"><Bot className="h-5 w-5" />Ask B-POP AI <Badge tone="brand">beta</Badge></h2>
+        <h2 className="flex items-center gap-2 font-bold"><Bot className="h-5 w-5" />Ask Dekha Hobe AI <Badge tone="brand">beta</Badge></h2>
         <p className="text-sm text-ink-3">Answers come from your own event data.</p>
         <div className="mt-4 space-y-3" data-testid="ai-chat">
           {chat.map((c, i) => (
@@ -225,7 +225,7 @@ export function Sms() {
             <Field label="Event"><select className="input" value={eventId} onChange={(e) => setEventId(e.target.value)}><option value="">Choose an event</option>{evs?.map((e) => <option key={e.event.id} value={e.event.id}>{e.event.title} · {dayLabel(e.event.startsAt)}</option>)}</select></Field>
           )}
           <Field label="Message" hint={`${body.length}/320 · "Reply STOP to opt out" is added automatically.`}>
-            <textarea className="textarea" rows={4} maxLength={320} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Last 50 GA tickets for Friday! Grab yours 👉 bpop.tags/e/…" data-testid="sms-body" />
+            <textarea className="textarea" rows={4} maxLength={320} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Last 50 GA tickets for Friday! Grab yours 👉 ahmedmasum2000000.github.io/dekhahobe/#/e/…" data-testid="sms-body" />
           </Field>
           <div className="flex items-center justify-between">
             <p className="text-sm text-ink-3">Sends to <strong className="text-ink">{size ?? '…'}</strong> opted-in people</p>
@@ -334,7 +334,7 @@ export function OrgSettings() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Name"><input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
-          <Field label="Profile URL" hint={`bpop.tags/g/${f.slug}`}><input className="input" value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} /></Field>
+          <Field label="Profile URL" hint={`ahmedmasum2000000.github.io/dekhahobe/#/g/${f.slug}`}><input className="input" value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} /></Field>
         </div>
         <Field label="Bio"><textarea className="textarea" rows={3} value={f.bio} onChange={(e) => setF({ ...f, bio: e.target.value })} /></Field>
         <div className="grid gap-4 sm:grid-cols-2">

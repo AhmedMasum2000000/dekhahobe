@@ -61,7 +61,7 @@ function safeSet(key: string, value: string) {
     localStorage.setItem(key, value);
   } catch (e) {
     // storage full or blocked: keep working in memory for this tab
-    console.error('Bpop Tags: could not persist data', key, value.length, e);
+    console.error('Dekha Hobe: could not persist data', key, value.length, e);
   }
 }
 

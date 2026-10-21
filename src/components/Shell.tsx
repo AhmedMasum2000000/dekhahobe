@@ -70,7 +70,7 @@ export function TopNav() {
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/70 bg-surface">
       <div className="h-1 bg-[linear-gradient(90deg,#FA02A3,#FED7EF_45%,#FA02A3_70%,#E3001B)]" aria-hidden />
       <div className="container-x flex h-16 items-center justify-between gap-3">
-        <Link to="/" aria-label="B-POP TAGS home">
+        <Link to="/" aria-label="Dekha Hobe home">
           <Logo />
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
@@ -147,14 +147,14 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div className={col}>
             <Logo />
-            <p className="mt-2 max-w-[16rem]">Bangla Pop Tags — curating pop-culture &amp; the underground scene across Bangladesh.</p>
+            <p className="mt-2 max-w-[16rem]">Dekha Hobe — curating pop-culture &amp; the underground scene across Bangladesh.</p>
           </div>
           <div className={col}>
             <p className="font-semibold text-ink">Company</p>
             <Link to="/platform">For organizers</Link>
             <Link to="/vision">Vision</Link>
             <Link to="/careers">Careers</Link>
-            <a href="mailto:press@bpoptags.example">Press</a>
+            <a href="mailto:press@dekhahobe.example">Press</a>
           </div>
           <div className={col}>
             <p className="font-semibold text-ink">Legal</p>
@@ -165,12 +165,12 @@ export function Footer() {
           </div>
           <div className={col}>
             <p className="font-semibold text-ink">Social</p>
-            <a href="https://www.instagram.com/bpop.tags/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5"><Instagram className="h-4 w-4" />@bpop.tags</a>
-            <a href="https://linktr.ee/bpoptags" target="_blank" rel="noreferrer">linktr.ee/bpoptags</a>
+            <a href="https://www.instagram.com/bpop.tags/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5"><Instagram className="h-4 w-4" />Instagram</a>
+            <a href="https://linktr.ee/bpoptags" target="_blank" rel="noreferrer">More updates</a>
             <Link to="/help">Contact</Link>
           </div>
         </div>
-        <p className="mt-12 text-xs text-ink-4">© {new Date().getFullYear()} B-POP TAGS (Bangla Pop Tags). Demo build — payments are simulated and data is stored in your browser.</p>
+        <p className="mt-12 text-xs text-ink-4">© {new Date().getFullYear()} Dekha Hobe. Demo build — payments are simulated and data is stored in your browser.</p>
       </div>
     </footer>
   );

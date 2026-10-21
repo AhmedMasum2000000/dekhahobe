@@ -22,7 +22,7 @@ export function Platform() {
     Comedy: ['laugh-lab-bd'],
   };
   const quotes: Record<string, string> = {
-    'dhaka-sound-collective': 'B-POP took us from one warehouse night a month to a weekly series with a waitlist every time.',
+    'dhaka-sound-collective': 'Dekha Hobe took us from one warehouse night a month to a weekly series with a waitlist every time.',
     'rooftop-sessions': 'Sixty seats, sold out in minutes — and the waitlist means nobody gets scalped.',
     'coxs-wave-fest': 'Kickbacks turned our first-year festival-goers into our best marketing team.',
     'rajshahi-mango-mela': 'Free RSVPs, a guest list and the door scanner — that’s all we needed to run our riverside mela.',
@@ -58,11 +58,11 @@ export function Platform() {
   return (
     <div className="pb-10">
       <section className="container-x pt-14 text-center">
-        <h1 className="headline mx-auto max-w-3xl text-6xl sm:text-8xl">Build your scene on B-POP</h1>
+        <h1 className="headline mx-auto max-w-3xl text-6xl sm:text-8xl">Build your scene on Dekha Hobe</h1>
         <p className="mx-auto mt-5 max-w-xl text-lg text-ink-2">The tools you need to create, sell out and grow any experience in Bangladesh.</p>
         <div className="mt-7 flex justify-center gap-2">
           <Link to="/create" className="btn btn-primary btn-lg">Get started</Link>
-          <a href="mailto:partners@bpoptags.example?subject=B-POP%20demo" className="btn btn-outline btn-lg">Book a demo</a>
+          <a href="mailto:partners@dekhahobe.example?subject=Dekha%20Hobe%20demo" className="btn btn-outline btn-lg">Book a demo</a>
         </div>
         {data && (
           <div className="mx-auto mt-12 grid max-w-3xl grid-cols-3 gap-4">
@@ -74,7 +74,7 @@ export function Platform() {
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {data?.orgs.slice(0, 8).map((o) => <Link key={o.org.id} to={`/g/${o.org.slug}`} title={o.org.name}><Avatar name={o.org.name} hue={o.org.avatarHue} size={48} /></Link>)}
         </div>
-        <p className="mt-4 text-sm text-ink-3">B-POP is built for every kind of community.</p>
+        <p className="mt-4 text-sm text-ink-3">Dekha Hobe is built for every kind of community.</p>
       </section>
 
       <section className="container-x mt-20">
@@ -88,7 +88,7 @@ export function Platform() {
             </div>
           </div>
           <div className="mt-6 text-center">
-            <h2 className="text-3xl font-black tracking-tight">Grow your events with the B-POP Organizer Dashboard</h2>
+            <h2 className="text-3xl font-black tracking-tight">Grow your events with the Dekha Hobe Organizer Dashboard</h2>
             <Link to="/dashboard" className="btn btn-primary btn-lg mt-5">Open the dashboard</Link>
           </div>
         </div>
@@ -105,7 +105,7 @@ export function Platform() {
         { icon: <MessageSquare className="h-5 w-5" />, t: 'Send unlimited free SMS blasts to re-engage your audience.' },
       ])}
       {block('03', 'Scale', 'Turn your community into culture', 'Make data-backed decisions with real-time insights.', [
-        { icon: <Bot className="h-5 w-5" />, t: 'Ask B-POP AI any question about your event’s performance (beta).' },
+        { icon: <Bot className="h-5 w-5" />, t: 'Ask Dekha Hobe AI any question about your event’s performance (beta).' },
         { icon: <BarChart3 className="h-5 w-5" />, t: 'Access rich organization insights to stay on top of your data.' },
         { icon: <Users className="h-5 w-5" />, t: 'Team roles, door scanner PINs and host links for your whole crew.' },
       ])}
@@ -139,9 +139,9 @@ const LEGAL: Record<string, { title: string; body: string[] }> = {
   'terms-of-service': {
     title: 'Terms of Service',
     body: [
-      'B-POP TAGS (“B-POP”) provides a platform for organizers to list events and for attendees to discover them and buy tickets. Organizers are responsible for their events, including permits, venue safety, age restrictions and the accuracy of event information.',
+      'Dekha Hobe provides a platform for organizers to list events and for attendees to discover them and buy tickets. Organizers are responsible for their events, including permits, venue safety, age restrictions and the accuracy of event information.',
       'Tickets are licences to attend an event and may be scanned once. Tickets may be transferred only where the organizer allows it. Resale above face value is not supported.',
-      'Prices are shown upfront and include B-POP’s service fee. Payments are processed by licensed payment partners (bKash, Nagad, card acquirers).',
+      'Prices are shown upfront and include Dekha Hobe’s service fee. Payments are processed by licensed payment partners (bKash, Nagad, card acquirers).',
       'This is a demo build: no payments are processed and all data is stored locally in your browser.',
     ],
   },
@@ -209,14 +209,14 @@ export function Help() {
           </details>
         ))}
       </div>
-      <a className="btn btn-primary btn-md mt-8" href="mailto:support@bpoptags.example">Contact support</a>
+      <a className="btn btn-primary btn-md mt-8" href="mailto:support@dekhahobe.example">Contact support</a>
     </div>
   );
 }
 
 export function Simple({ kind }: { kind: 'app' | 'vision' | 'careers' }) {
   const content = {
-    app: { t: 'Get the B-POP TAGS app', b: 'Instant ticket access, easy transfers and a feed curated for you. This web app works on any phone — add it to your home screen from your browser’s share menu.' },
+    app: { t: 'Get the Dekha Hobe app', b: 'Instant ticket access, easy transfers and a feed curated for you. This web app works on any phone — add it to your home screen from your browser’s share menu.' },
     vision: { t: 'Our vision', b: 'Bangladesh has one of the youngest, most social populations on earth. We’re building the place where that energy turns into real-life plans — and where the people who create those moments can make a living from them.' },
     careers: { t: 'Careers', b: 'We’re a small team in Dhaka building for the culture. No open roles in this demo — but we’d love to hear from you.' },
   }[kind];

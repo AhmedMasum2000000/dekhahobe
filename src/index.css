@@ -38,6 +38,22 @@
 }
 
 @layer components {
+  /* Crop the square uploads in CSS so the supplied wordmarks stay unaltered. */
+  .brand-logo { position: relative; display: inline-block; flex-shrink: 0; width: 108px; height: 32px; overflow: hidden; vertical-align: middle; }
+  .brand-logo img { position: absolute; left: 0; top: 50%; width: 100%; max-width: none; height: auto; transform: translateY(-49%); user-select: none; }
+  .brand-logo-light { mix-blend-mode: multiply; }
+  .brand-logo-dark { display: none; mix-blend-mode: screen; }
+  .dark .brand-logo-light { display: none; }
+  .dark .brand-logo-dark { display: block; }
+  .brand-logo-compact { width: 80px; height: 26px; }
+  @media (min-width: 375px) {
+    .brand-logo { width: 144px; height: 36px; }
+    .brand-logo-compact { width: 100px; height: 30px; }
+  }
+  @media (min-width: 640px) {
+    .brand-logo { width: 176px; height: 42px; }
+    .brand-logo-compact { width: 112px; height: 32px; }
+  }
   .container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition active:scale-[.98] disabled:opacity-40 disabled:pointer-events-none whitespace-nowrap; }
   .btn-lg { @apply h-12 px-6 text-[15px]; }
@@ -60,9 +76,9 @@
   .prose-bp p { @apply mb-3 leading-relaxed text-ink-2; }
   .prose-bp strong { @apply font-semibold text-ink; }
 
-  /* B-POP TAGS brand motifs */
+  /* Dekha Hobe brand motifs */
   .font-poster { font-synthesis: none; font-weight: 400; letter-spacing: 0.005em; }
-  .headline { @apply font-poster uppercase leading-[0.92]; }
+  .headline { @apply break-words font-poster uppercase leading-[0.92]; }
   .halftone {
     background-image: radial-gradient(currentColor 1.1px, transparent 1.6px);
     background-size: 9px 9px;

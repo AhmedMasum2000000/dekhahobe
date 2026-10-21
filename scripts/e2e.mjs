@@ -1,4 +1,4 @@
-// End-to-end flows for B-POP TAGS, run against a live build:
+// End-to-end flows for Dekha Hobe, run against a live build:
 //   npm run build && npm run preview   (in one terminal)
 //   npm run e2e                         (in another)
 // Env: BASE (default http://localhost:4173), SHOTS (screenshot folder, optional)
@@ -52,7 +52,7 @@ async function login(phone, name) {
   await go('/login');
   await tid('phone-input').fill(phone);
   await tid('send-code').click();
-  const code = await lastSmsCode(/(\d{6}) is your B-POP TAGS/);
+  const code = await lastSmsCode(/(\d{6}) is your Dekha Hobe/);
   for (let i = 0; i < 6; i++) await tid(`otp-${i}`).fill(code[i]);
   if (name) {
     await tid('profile-name').waitFor();
@@ -302,7 +302,7 @@ try {
     ['back', () => page.goBack()],
     ['Tickets tab', () => tabs.getByText('Tickets', { exact: true }).click()],
     ['Activity tab', () => tabs.getByText('Activity', { exact: true }).click()],
-    ['logo', () => page.locator('header a[aria-label="B-POP TAGS home"]').click()],
+    ['logo', () => page.locator('header a[aria-label="Dekha Hobe home"]').click()],
   ]) {
     await act();
     await page.waitForTimeout(700);
@@ -344,7 +344,7 @@ try {
     return r.continue();
   });
   await p3.goto(BASE + '/', { waitUntil: 'commit' });
-  const bootShown = await p3.locator('#boot').getByText('Loading B-POP TAGS').waitFor({ timeout: 5000 }).then(() => true, () => false);
+  const bootShown = await p3.locator('#boot').getByText('Loading Dekha Hobe').waitFor({ timeout: 5000 }).then(() => true, () => false);
   ok(bootShown, 'while code loads the page shows a loading screen, not solid white');
   const healed = await p3.getByTestId('hero-title').waitFor({ timeout: 15000 }).then(() => true, () => false);
   ok(healed && !missMain, 'missing main code file → page fetches a fresh copy and renders');
@@ -378,7 +378,7 @@ try {
     ['organizer', () => p4.locator('main a[href*="#/g/"]').first().click()],
     ['Tickets', () => tabs4.getByText('Tickets', { exact: true }).click()],
     ['Activity', () => tabs4.getByText('Activity', { exact: true }).click()],
-    ['home', () => p4.locator('header a[aria-label="B-POP TAGS home"]').click()],
+    ['home', () => p4.locator('header a[aria-label="Dekha Hobe home"]').click()],
   ]) {
     await act();
     await p4.waitForTimeout(600);

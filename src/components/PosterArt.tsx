@@ -2,7 +2,7 @@ import { memo, useId } from 'react';
 import type { Poster } from '@/api';
 
 // Original generative flyer art — six styles, deterministic from a seed.
-// 'zine' is the B-POP TAGS collage look: black, hot pink halftone, red tape, Y2K star.
+// 'zine' is the Dekha Hobe collage look: black, hot pink halftone, red tape, Y2K star.
 // No SVG filters or masks: phones (WebKit) render those into large offscreen buffers, and
 // a page full of posters can exhaust memory and blank the view. Grain is a shared CSS tile.
 function rng(seed: number) {
@@ -115,7 +115,7 @@ export const PosterArt = memo(function PosterArt({ poster, title, kicker, classN
               <path d="M19.5 4.9 L34.4 23.3 L54.6 18.1 L43.6 34.8 L58.5 53.3 L36.8 45.2 L25.8 61.8 L23.3 40.1 L1.7 31.9 L21.9 26.6Z" fill="none" stroke="#FA02A3" strokeWidth="4" strokeLinejoin="round" />
               <path d="M25.6 22.4 L32.1 30.2 L40.8 28.1 L36.3 35.4 L42.5 43.4 L33.2 40.0 L28.3 47.1 L27.1 37.8 L17.9 34.1 L26.4 31.7Z" fill="#FA02A3" />
             </g>
-            <text x="92" y="52" fontSize="22" fontStyle="italic" fontWeight="900" fill="#FED7EF" stroke="#FA02A3" strokeWidth="1.5" paintOrder="stroke" fontFamily="Inter Tight, Inter, sans-serif" letterSpacing="1">B-POP</text>
+            <text x="92" y="52" fontSize="22" fontWeight="900" fill="#FA02A3" fontFamily="Anton, Inter Tight, Inter, sans-serif" letterSpacing="1">DEKHA HOBE.</text>
           </>
         );
       case 'type':

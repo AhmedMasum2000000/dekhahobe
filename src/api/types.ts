@@ -1,4 +1,4 @@
-// Domain model for Bpop Tags. Shared by the local (browser) adapter and the
+// Domain model for Dekha Hobe. Shared by the local (browser) adapter and the
 // future Supabase adapter — see docs/REA-teardown.md §3.
 
 export type ID = string;
