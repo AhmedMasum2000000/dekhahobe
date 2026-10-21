@@ -117,8 +117,8 @@ export default function Home() {
             <div className="halftone halftone-fade pointer-events-none absolute -inset-8 text-brand/35" aria-hidden />
             <img
               src={heroArt}
-              width={1176}
-              height={1337}
+              width={960}
+              height={1091}
               alt="Dekha Hobe artwork: a Mughal-miniature-style woman in sunglasses with a parrot and a lotus, printed in halftone"
               className="relative h-auto w-full select-none"
               draggable={false}
